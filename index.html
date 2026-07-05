@@ -260,21 +260,71 @@
     box-shadow: var(--shadow-2);
     animation: slideIn .2s ease;
   }
+  .draft.draft-warn {
+    background: linear-gradient(180deg, rgba(90,169,230,.06), var(--bg-1));
+    border-color: var(--info);
+  }
   .draft-label {
     font-size: 11px;
     font-weight: 800;
     color: var(--accent);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     margin-bottom: 12px;
     display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+    line-height: 1.4;
   }
+  .draft.draft-warn .draft-label { color: var(--info); }
   .draft-label::before {
     content: ""; width: 6px; height: 6px; border-radius: 50%;
     background: var(--accent);
     animation: pulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
   }
+  .draft.draft-warn .draft-label::before { background: var(--info); }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .draft-retry {
+    margin-left: auto;
+    padding: 4px 10px;
+    background: var(--bg-2);
+    color: var(--info);
+    border: 1px solid rgba(90,169,230,.4);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    transition: transform .1s ease, background .12s ease;
+  }
+  .draft-retry:hover { background: rgba(90,169,230,.15); }
+  .draft-retry:active { transform: scale(0.95); }
+  .draft-retry:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+
+  .field label .req {
+    color: var(--info);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
+  }
+
+  /* Placeholder styling — clearly a hint, not a value */
+  .draft input::placeholder,
+  .draft textarea::placeholder {
+    color: var(--text-3);
+    font-style: italic;
+    opacity: 0.55;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder,
+  .field select {
+    font-family: inherit;
+  }
 
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
   .field label {
@@ -991,6 +1041,8 @@
     query: '',
     cat: 'Semua',
     pending: null,
+    pendingReason: null,  // 'ai-success' | 'ai-failed' | 'ai-rate-limit' | 'ai-no-key' | 'manual'
+    lastSearchTerm: '',
     editingId: null,
     editingDraft: null,
     settings: {
@@ -1411,21 +1463,35 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     if (!state.pending) return;
     const d = state.pending;
     const canSave = d.hanzi.trim() && d.indonesia.trim();
+    const reason = state.pendingReason || 'ai-success';
+
+    const labels = {
+      'ai-success': { title: 'DRAF DARI AI — Cek & Koreksi, Lalu Simpan', cls: 'ok' },
+      'ai-failed':  { title: 'MANUAL — AI gagal, ketik pinyin & arti sendiri', cls: 'warn' },
+      'ai-rate-limit': { title: 'MANUAL — AI limit sebentar, ketik sendiri atau retry', cls: 'warn' },
+      'ai-no-key':  { title: 'MANUAL — API belum di-setup, ketik semua sendiri', cls: 'warn' },
+      'manual':     { title: 'MANUAL — Ketik pinyin & arti, lalu Simpan', cls: 'ok' },
+    };
+    const lbl = labels[reason] || labels['ai-success'];
+    const showRetry = reason === 'ai-failed' || reason === 'ai-rate-limit';
+
     const box = document.createElement('div');
-    box.className = 'draft';
+    box.className = 'draft draft-' + lbl.cls;
     box.innerHTML = `
-      <div class="draft-label">Draf Kata — Cek, Koreksi, Lalu Simpan</div>
+      <div class="draft-label">${lbl.title}
+        ${showRetry ? '<button class="draft-retry" data-act="retry-ai" title="Coba panggil AI lagi">🔄 Coba AI Lagi</button>' : ''}
+      </div>
       <div class="field">
         <label>漢字 / Hanzi</label>
         <input class="hanzi-input" data-field="hanzi" value="${escapeHtml(d.hanzi)}" />
       </div>
       <div class="field">
-        <label>Pinyin</label>
-        <input class="pinyin-input" data-field="pinyin" value="${escapeHtml(d.pinyin)}" placeholder="gāngjīn" />
+        <label>Pinyin ${!d.pinyin ? '<span class="req">(wajib ketik)</span>' : ''}</label>
+        <input class="pinyin-input" data-field="pinyin" value="${escapeHtml(d.pinyin)}" placeholder="ketik pinyin dengan tanda nada" />
       </div>
       <div class="field">
-        <label>Arti Indonesia</label>
-        <input data-field="indonesia" value="${escapeHtml(d.indonesia)}" placeholder="besi tulangan" />
+        <label>Arti Indonesia ${!d.indonesia ? '<span class="req">(wajib ketik)</span>' : ''}</label>
+        <input data-field="indonesia" value="${escapeHtml(d.indonesia)}" placeholder="ketik arti dalam Bahasa Indonesia" />
       </div>
       <div class="field">
         <label>Kategori</label>
@@ -1434,11 +1500,11 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
         </select>
       </div>
       <div class="field">
-        <label>Contoh / Catatan</label>
-        <textarea data-field="contoh" rows="2" placeholder="misal: 綁鋼筋 bǎng gāngjīn = mengikat besi">${escapeHtml(d.contoh)}</textarea>
+        <label>Contoh / Catatan (opsional)</label>
+        <textarea data-field="contoh" rows="2" placeholder="opsional — catatan singkat atau contoh pemakaian di lapangan">${escapeHtml(d.contoh)}</textarea>
       </div>
       <div class="draft-actions">
-        <button class="btn-save" data-act="draft-save" ${canSave ? '' : 'disabled'}>✅ Simpan ke Kamus</button>
+        <button class="btn-save" data-act="draft-save" ${canSave ? '' : 'disabled'}>${canSave ? '✅ Simpan ke Kamus' : 'Isi Pinyin & Arti dulu'}</button>
         <button class="btn-ghost" data-act="draft-cancel">Batal</button>
       </div>
     `;
@@ -1449,6 +1515,10 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
       const btn = box.querySelector('[data-act="draft-save"]');
       const ok = state.pending.hanzi.trim() && state.pending.indonesia.trim();
       btn.disabled = !ok;
+      btn.textContent = ok ? '✅ Simpan ke Kamus' : 'Isi Pinyin & Arti dulu';
+      // Clear "wajib ketik" hint once field filled
+      const labelSpan = ev.target.closest('.field')?.querySelector('label .req');
+      if (labelSpan && ev.target.value.trim()) labelSpan.remove();
     });
     slot.appendChild(box);
   }
@@ -1503,25 +1573,78 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
 
     clearAlert();
     state.pending = null;
+    state.pendingReason = null;
+    state.lastSearchTerm = term;
     renderDraft();
 
     setLoading(true);
     try {
       const result = await lookupTerm(term);
       state.pending = result;
+      state.pendingReason = 'ai-success';
       renderDraft();
       input.value = '';
     } catch (err) {
       console.error(err);
       state.pending = { hanzi: term, pinyin: '', indonesia: '', kategori: 'Umum', contoh: '' };
+      const cat = classifyAIError(err);
+      state.pendingReason = cat.reason;
       renderDraft();
-      if (err.message === 'MISSING_KEY') {
-        showAlert('API key belum diisi. Buka ⚙️ Pengaturan dulu, atau isi manual di draf bawah.');
-      } else if (err.message === 'BAD_JSON') {
-        showAlert('AI kasih respon yang tidak bisa dibaca. Isi manual di draf bawah.');
-      } else {
-        showAlert('AI gagal diakses. Isi manual di draf bawah. (' + err.message.slice(0, 80) + ')');
-      }
+      showAlert(cat.message, cat.kind);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function classifyAIError(err) {
+    const msg = String(err?.message || err || '');
+    if (msg === 'MISSING_KEY') {
+      return { reason: 'ai-no-key', kind: 'error',
+        message: 'API key/Worker belum diisi. Buka ⚙️ Pengaturan atau ketik manual di bawah.' };
+    }
+    if (msg === 'BAD_JSON') {
+      return { reason: 'ai-failed', kind: 'error',
+        message: 'AI kasih respon aneh. Ketik manual di bawah.' };
+    }
+    if (/429|rate.?limit|quota|exceeded|RESOURCE_EXHAUSTED/i.test(msg)) {
+      return { reason: 'ai-rate-limit', kind: 'info',
+        message: 'AI sedang sibuk (limit 15 request/menit tercapai). Ketik manual di bawah, atau tap "Coba AI Lagi" setelah 1 menit.' };
+    }
+    if (/401|unauthorized|API_KEY_INVALID/i.test(msg)) {
+      return { reason: 'ai-failed', kind: 'error',
+        message: 'API key ditolak. Cek ⚙️ Pengaturan — mungkin key expired atau salah.' };
+    }
+    if (/failed to fetch|networkerror|load failed/i.test(msg)) {
+      return { reason: 'ai-failed', kind: 'error',
+        message: 'Tidak bisa hubungi AI (koneksi/VPN). Ketik manual di bawah.' };
+    }
+    return { reason: 'ai-failed', kind: 'error',
+      message: 'AI gagal. Ketik manual di bawah. (' + msg.slice(0, 60) + ')' };
+  }
+
+  async function retryAI() {
+    if (!state.lastSearchTerm) return;
+    const term = state.lastSearchTerm;
+    clearAlert();
+    setLoading(true);
+    // Preserve current field values so user's manual typing isn't lost if retry fails
+    const currentDraft = { ...state.pending };
+    try {
+      const result = await lookupTerm(term);
+      // Merge: AI result wins on empty fields, keep user's manual edits
+      state.pending = {
+        hanzi: currentDraft.hanzi || result.hanzi,
+        pinyin: currentDraft.pinyin || result.pinyin,
+        indonesia: currentDraft.indonesia || result.indonesia,
+        kategori: (currentDraft.kategori && currentDraft.kategori !== 'Umum') ? currentDraft.kategori : result.kategori,
+        contoh: currentDraft.contoh || result.contoh,
+      };
+      state.pendingReason = 'ai-success';
+      renderDraft();
+      toast('✅ AI berhasil di-retry', 'success');
+    } catch (err) {
+      const cat = classifyAIError(err);
+      showAlert(cat.message, cat.kind);
     } finally {
       setLoading(false);
     }
@@ -2006,6 +2129,7 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
       const act = btn.dataset.act;
       if (act === 'draft-save') acceptDraft();
       else if (act === 'draft-cancel') cancelDraft();
+      else if (act === 'retry-ai') retryAI();
       else if (act === 'edit-save') saveEdit();
       else if (act === 'edit-cancel') cancelEdit();
       else if (act === 'edit') {

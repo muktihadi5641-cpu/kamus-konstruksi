@@ -626,6 +626,58 @@
     padding: 14px;
     margin-bottom: 24px;
   }
+
+  .status-panel {
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .status-panel .status-title {
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+  }
+  .status-panel .status-detail {
+    color: var(--text-2);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .status-panel .status-raw {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    color: var(--text-3);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .status-panel .status-raw code {
+    background: var(--bg-0);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--danger);
+    word-break: break-all;
+  }
+  .status-panel.mode-ok {
+    background: rgba(111,207,151,.08);
+    border-color: rgba(111,207,151,.35);
+  }
+  .status-panel.mode-ok .status-title { color: var(--success); }
+  .status-panel.mode-error {
+    background: rgba(232,93,93,.08);
+    border-color: rgba(232,93,93,.4);
+  }
+  .status-panel.mode-error .status-title { color: var(--danger); }
+  .status-panel.mode-local {
+    background: var(--bg-2);
+    border-color: var(--border);
+  }
+  .status-panel.mode-local .status-title { color: var(--text-2); }
   .btn-save-big {
     width: 100%;
     padding: 14px;
@@ -795,6 +847,8 @@
       </button>
     </div>
     <div class="drawer-body">
+
+      <div id="drawer-status" class="status-panel"></div>
 
       <div class="drawer-section">
         <div class="drawer-section-title">🌐 Kamus Bersama (Recommended)</div>
@@ -1091,7 +1145,39 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
 
   function normalizeWorkerUrl(u) {
     if (!u) return '';
-    return u.trim().replace(/\/+$/, '');
+    let s = u.trim().replace(/\/+$/, '');
+    if (!s) return '';
+    // Auto-prepend https:// if missing
+    if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+    return s;
+  }
+
+  function diagnoseError(err) {
+    if (!err) return { title: 'Belum ada info', detail: '' };
+    const msg = String(err.message || err || '');
+    const status = err.status;
+    if (status === 401 || /unauthorized|401/i.test(msg)) {
+      return {
+        title: '❌ Token salah',
+        detail: 'Token yang kamu isi tidak match dengan yang di server. Cek copy-paste, pastikan tidak ada spasi di depan/belakang.',
+      };
+    }
+    if (status === 403) {
+      return { title: '❌ Ditolak', detail: 'Kamu login sebagai team, tapi butuh admin buat aksi ini.' };
+    }
+    if (status === 404) {
+      return { title: '❌ Endpoint tidak ada', detail: 'Worker URL kemungkinan salah. Pastikan formatnya https://kamus-proxy.username.workers.dev' };
+    }
+    if (status >= 500) {
+      return { title: '❌ Server error', detail: msg };
+    }
+    if (/failed to fetch|networkerror|load failed|fetch failed/i.test(msg)) {
+      return {
+        title: '❌ Tidak bisa terhubung',
+        detail: 'Bisa jadi: (a) Worker URL salah/typo, (b) HP tidak ada internet, (c) VPN/proxy blok Cloudflare, (d) Worker sudah dihapus.',
+      };
+    }
+    return { title: '❌ Error', detail: msg.slice(0, 200) };
   }
 
   // ─── Remote Sync (Shared Mode) ───────────────────────────────
@@ -1144,6 +1230,7 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     } finally {
       state.syncing = false;
       renderSync();
+      renderDrawerStatus();
     }
   }
 
@@ -1746,6 +1833,7 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     el('#s-token').value = state.settings.token || '';
     el('#s-name').value = state.settings.userName || '';
     el('#s-gemini').value = state.settings.geminiKey || '';
+    renderDrawerStatus();
   }
   function readSettingsFromForm() {
     state.settings.workerUrl = normalizeWorkerUrl(el('#s-worker').value);
@@ -1793,24 +1881,71 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     label.textContent = 'Menyimpan…';
 
     readSettingsFromForm();
-    try {
-      await applySettingsChange();
-      // Success feedback
+    // Update form value in case normalize added https://
+    el('#s-worker').value = state.settings.workerUrl || '';
+
+    await applySettingsChange();
+    renderDrawerStatus();
+    spin.hidden = true;
+
+    // Determine outcome based on final mode
+    if (isShared() && state.mode === 'offline') {
+      // Save persisted but connection failed
+      const diag = diagnoseError({ message: state.syncError });
+      label.textContent = '⚠️ Tersimpan tapi ' + (state.mode === 'offline' ? 'offline' : 'error');
+      toast(diag.title + ' — cek panel status di atas', 'error');
+      setTimeout(() => {
+        label.textContent = '💾 Simpan & Sync Sekarang';
+        btn.disabled = false;
+      }, 2500);
+    } else if (isShared() && (state.mode === 'admin' || state.mode === 'team')) {
+      // Success
+      btn.classList.add('success');
+      label.textContent = state.mode === 'admin' ? '✅ Konek (admin)' : '✅ Konek (tim)';
+      toast('✅ Tersambung ke kamus tim — ' + state.entries.length + ' kata di-sync', 'success');
+      setTimeout(() => {
+        btn.classList.remove('success');
+        label.textContent = '💾 Simpan & Sync Sekarang';
+        btn.disabled = false;
+      }, 2000);
+    } else {
+      // Local / solo mode
       btn.classList.add('success');
       label.textContent = '✅ Tersimpan';
-      spin.hidden = true;
-      toast('✅ Pengaturan tersimpan permanen', 'success');
+      toast('✅ Pengaturan tersimpan (mode lokal)', 'success');
       setTimeout(() => {
         btn.classList.remove('success');
         label.textContent = '💾 Simpan & Sync Sekarang';
         btn.disabled = false;
       }, 1600);
-    } catch (e) {
-      btn.disabled = false;
-      spin.hidden = true;
-      label.textContent = '💾 Simpan & Sync Sekarang';
-      toast('Gagal sync: ' + (e.message || 'unknown').slice(0, 60), 'error');
     }
+  }
+
+  function renderDrawerStatus() {
+    const el0 = el('#drawer-status');
+    if (!el0) return;
+    if (!isShared()) {
+      el0.className = 'status-panel mode-local';
+      el0.innerHTML = '<div class="status-title">⚪ Mode Lokal (Solo)</div>' +
+        '<div class="status-detail">Worker URL kosong — kata cuma di HP kamu, tidak sync ke tim.</div>';
+      return;
+    }
+    if (state.mode === 'admin' || state.mode === 'team') {
+      el0.className = 'status-panel mode-ok';
+      el0.innerHTML = `<div class="status-title">${state.mode === 'admin' ? '🟠 Tersambung (Admin)' : '🟢 Tersambung (Tim)'}</div>` +
+        `<div class="status-detail">${state.entries.length} kata di server. Sync tiap 60 detik + tiap buka app.</div>`;
+      return;
+    }
+    if (state.mode === 'offline') {
+      const diag = diagnoseError({ message: state.syncError });
+      el0.className = 'status-panel mode-error';
+      el0.innerHTML = `<div class="status-title">${diag.title}</div>` +
+        `<div class="status-detail">${diag.detail}</div>` +
+        (state.syncError ? `<div class="status-raw">Detail teknis: <code>${escapeHtml(state.syncError.slice(0, 150))}</code></div>` : '');
+      return;
+    }
+    el0.className = 'status-panel';
+    el0.innerHTML = '<div class="status-title">⏳ Belum test</div><div class="status-detail">Klik Simpan & Sync untuk test koneksi.</div>';
   }
 
   // ─── Migration helper ────────────────────────────────────────

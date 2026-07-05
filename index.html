@@ -117,12 +117,35 @@
     font-size: 12px;
     color: var(--text-3);
     display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
   }
-  .brand-sub .dot {
+  .brand-sub .sep { opacity: 0.5; }
+  .sync-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+  .sync-dot {
     width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-3);
+  }
+  .sync-badge.mode-local .sync-dot { background: var(--text-3); }
+  .sync-badge.mode-team .sync-dot,
+  .sync-badge.mode-admin .sync-dot {
     background: var(--success);
     box-shadow: 0 0 6px rgba(111,207,151,.6);
   }
+  .sync-badge.mode-offline .sync-dot {
+    background: var(--danger);
+    box-shadow: 0 0 6px rgba(232,93,93,.6);
+  }
+  .sync-badge.mode-admin { color: var(--accent-hi); border-color: rgba(255,138,61,.4); }
+  .sync-badge.syncing .sync-dot { animation: pulse 1s ease-in-out infinite; }
   .icon-btn {
     width: 40px; height: 40px;
     border-radius: 10px;
@@ -447,6 +470,15 @@
     margin-top: 4px;
     line-height: 1.4;
   }
+  .card-attribution {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-top: 6px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.6;
+  }
   .card-actions {
     display: flex; gap: 6px;
     margin-top: 12px;
@@ -648,7 +680,14 @@
         <span class="brand-mark" aria-hidden="true">🏗️</span>
         <div>
           <h1>Kamus Konstruksi</h1>
-          <p class="brand-sub"><span id="count-word">0</span> kata · <span class="dot" aria-hidden="true"></span> tersimpan lokal</p>
+          <p class="brand-sub">
+            <span id="count-word">0</span> kata
+            <span class="sep">·</span>
+            <span class="sync-badge" id="sync-badge">
+              <span class="sync-dot" id="sync-dot"></span>
+              <span id="sync-label">tersimpan lokal</span>
+            </span>
+          </p>
         </div>
       </div>
       <button class="icon-btn" id="btn-open-settings" aria-label="Pengaturan" title="Pengaturan">
@@ -718,20 +757,35 @@
     <div class="drawer-body">
 
       <div class="drawer-section">
-        <div class="drawer-section-title">🤖 Gemini API (Gratis)</div>
+        <div class="drawer-section-title">🌐 Kamus Bersama (Recommended)</div>
         <div class="field">
-          <label for="s-endpoint">Endpoint</label>
-          <input id="s-endpoint" type="text" placeholder="Kosongkan = pakai Gemini default" />
+          <label for="s-worker">Worker URL</label>
+          <input id="s-worker" type="text" placeholder="https://kamus-proxy.username.workers.dev" autocomplete="off" />
         </div>
         <div class="field">
-          <label for="s-key">API Key</label>
-          <input id="s-key" type="password" placeholder="AIza... (dari aistudio.google.com)" autocomplete="off" />
+          <label for="s-token">Token</label>
+          <input id="s-token" type="password" placeholder="Team token (dari Mukti) atau Admin token" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="s-name">Nama Kamu (opsional)</label>
+          <input id="s-name" type="text" placeholder="misal: Mukti / Rizki / Andi" autocomplete="off" maxlength="30" />
         </div>
         <p class="hint">
-          Ambil API key <b>gratis</b> di <code>aistudio.google.com/apikey</code> — cukup login Google, no kartu kredit.
-          Limit gratisnya <b>1500 request/hari</b>, cukup banget buat kamus. Kalau nanti mau share tanpa teman perlu key sendiri,
-          deploy <code>worker.js</code> ke Cloudflare (lihat README-DEPLOY.md), lalu ganti Endpoint dengan URL worker-mu.
-          Semua data disimpan lokal di HP kamu.
+          Isi Worker URL & Token buat sync ke kamus bersama tim. Kalau punya <b>Admin Token</b>, kamu bisa edit/hapus juga.
+          Nama akan muncul sebagai "ditambahkan oleh …" di kartu yang kamu tambah.
+          Lihat <code>README-DEPLOY.md</code> untuk cara deploy worker.
+        </p>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">🤖 Gemini API (Solo Mode)</div>
+        <div class="field">
+          <label for="s-gemini">Gemini API Key</label>
+          <input id="s-gemini" type="password" placeholder="AIza... (dari aistudio.google.com/apikey)" autocomplete="off" />
+        </div>
+        <p class="hint">
+          Ini hanya perlu diisi kalau <b>Worker URL kosong</b> — buat pakai app solo tanpa server bersama. Data disimpan lokal di HP.
+          Kalau kamu sudah pakai Worker di atas, kosongkan bagian ini — key Gemini sudah di server.
         </p>
       </div>
 
@@ -808,8 +862,8 @@
   'use strict';
 
   // ─── Constants ───────────────────────────────────────────────
-  const STORAGE_KEY = 'kamus-konstruksi-v1';
-  const SETTINGS_KEY = 'kamus-konstruksi-settings-v1';
+  const STORAGE_KEY = 'kamus-konstruksi-v2';
+  const SETTINGS_KEY = 'kamus-konstruksi-settings-v2';
   const CATS = ['Alat', 'Alat Berat', 'Material', 'Struktur', 'Keselamatan', 'Proses', 'Ukuran', 'Umum'];
   const CAT_VAR = {
     'Alat': '--cat-alat',
@@ -823,7 +877,8 @@
   };
 
   const GEMINI_MODEL = 'gemini-2.5-flash';
-  const DEFAULT_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const DIRECT_GEMINI = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const SYNC_INTERVAL_MS = 60_000;
 
   // ─── State ───────────────────────────────────────────────────
   const state = {
@@ -834,9 +889,15 @@
     editingId: null,
     editingDraft: null,
     settings: {
-      endpoint: '',
-      apiKey: '',
+      workerUrl: '',      // e.g. https://kamus-proxy.username.workers.dev
+      token: '',          // team or admin token
+      geminiKey: '',      // fallback: direct Gemini call (Mode A / local-only)
+      userName: '',       // display name shown as "added by ..."
     },
+    mode: 'local',        // 'local' | 'team' | 'admin' | 'offline'
+    syncing: false,
+    lastSyncedAt: 0,
+    syncError: null,
     loading: false,
   };
 
@@ -928,20 +989,24 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
 
   // ─── AI Call ─────────────────────────────────────────────────
   async function lookupTerm(term) {
-    const endpoint = state.settings.endpoint?.trim() || DEFAULT_ENDPOINT;
-    const isGeminiDirect = endpoint.includes('generativelanguage.googleapis.com');
-    const key = state.settings.apiKey?.trim() || '';
+    const worker = normalizeWorkerUrl(state.settings.workerUrl);
+    const token = state.settings.token?.trim() || '';
+    const geminiKey = state.settings.geminiKey?.trim() || '';
 
-    if (isGeminiDirect && !key) throw new Error('MISSING_KEY');
-
-    const headers = { 'Content-Type': 'application/json' };
-    if (isGeminiDirect) {
-      headers['x-goog-api-key'] = key;
-    } else if (key) {
-      headers['Authorization'] = 'Bearer ' + key;
+    // Route: worker AI proxy if available, else direct Gemini
+    let endpoint, headers = { 'Content-Type': 'application/json' };
+    if (worker && token) {
+      endpoint = worker + '/ai';
+      headers['Authorization'] = 'Bearer ' + token;
+    } else if (geminiKey) {
+      endpoint = DIRECT_GEMINI;
+      headers['x-goog-api-key'] = geminiKey;
+    } else {
+      throw new Error('MISSING_KEY');
     }
 
     const body = {
+      model: GEMINI_MODEL,
       contents: [{ parts: [{ text: buildPrompt(term) }] }],
       generationConfig: {
         temperature: 0.3,
@@ -973,17 +1038,117 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     };
   }
 
+  function normalizeWorkerUrl(u) {
+    if (!u) return '';
+    return u.trim().replace(/\/+$/, '');
+  }
+
+  // ─── Remote Sync (Shared Mode) ───────────────────────────────
+  function isShared() {
+    return !!(normalizeWorkerUrl(state.settings.workerUrl) && state.settings.token?.trim());
+  }
+  function isAdmin() { return state.mode === 'admin'; }
+  function canEdit() { return state.mode === 'local' || state.mode === 'admin'; }
+
+  async function apiCall(path, opts = {}) {
+    const worker = normalizeWorkerUrl(state.settings.workerUrl);
+    const token = state.settings.token.trim();
+    if (!worker || !token) throw new Error('NOT_CONFIGURED');
+    const res = await fetch(worker + path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(opts.headers || {}),
+      },
+    });
+    const text = await res.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch {}
+    if (!res.ok) {
+      const err = new Error(data?.error || 'HTTP ' + res.status);
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    return data;
+  }
+
+  async function syncFromRemote() {
+    if (!isShared()) { state.mode = 'local'; return; }
+    state.syncing = true; renderSync();
+    try {
+      const data = await apiCall('/entries', { method: 'GET' });
+      state.entries = Array.isArray(data.entries) ? data.entries : [];
+      state.mode = data.mode === 'admin' ? 'admin' : 'team';
+      state.lastSyncedAt = Date.now();
+      state.syncError = null;
+      saveEntries();
+      render();
+    } catch (e) {
+      state.mode = 'offline';
+      state.syncError = e.message || 'sync_failed';
+      renderSync();
+      // Fallback: keep cached entries visible
+    } finally {
+      state.syncing = false;
+      renderSync();
+    }
+  }
+
+  async function remoteAdd(entry) {
+    const data = await apiCall('/entries', {
+      method: 'POST',
+      body: JSON.stringify({ ...entry, author: state.settings.userName || 'anon' }),
+    });
+    return data.entry;
+  }
+  async function remoteEdit(id, patch) {
+    const data = await apiCall('/entries/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    });
+    return data.entry;
+  }
+  async function remoteDelete(id) {
+    return await apiCall('/entries/' + encodeURIComponent(id), { method: 'DELETE' });
+  }
+  async function remoteBulkUpload(entries) {
+    return await apiCall('/entries/bulk', {
+      method: 'POST',
+      body: JSON.stringify({
+        entries,
+        author: state.settings.userName || 'anon',
+      }),
+    });
+  }
+
   // ─── Rendering ───────────────────────────────────────────────
   function render() {
     renderCount();
     renderPills();
     renderList();
     renderDraft();
+    renderSync();
     updateEmptyState();
   }
 
   function renderCount() {
     el('#count-word').textContent = state.entries.length;
+  }
+
+  function renderSync() {
+    const badge = el('#sync-badge');
+    const dot = el('#sync-dot');
+    const label = el('#sync-label');
+    badge.className = 'sync-badge mode-' + state.mode + (state.syncing ? ' syncing' : '');
+    if (state.syncing) { label.textContent = 'sync…'; return; }
+    switch (state.mode) {
+      case 'admin':   label.textContent = 'admin · sync'; break;
+      case 'team':    label.textContent = 'tim · sync'; break;
+      case 'offline': label.textContent = 'offline'; break;
+      default:        label.textContent = 'lokal';
+    }
   }
 
   function renderPills() {
@@ -1043,6 +1208,18 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
         if (entry.contoh) {
           noteEl.textContent = entry.contoh;
           noteEl.hidden = false;
+        }
+        // Attribution
+        if (entry.createdBy && entry.createdBy !== 'anon') {
+          const attr = document.createElement('div');
+          attr.className = 'card-attribution';
+          attr.textContent = 'oleh ' + entry.createdBy;
+          card.appendChild(attr);
+        }
+        // Actions: hide edit/delete if team (non-admin)
+        if (isShared() && state.mode === 'team') {
+          const actions = node.querySelector('.card-actions');
+          if (actions) actions.remove();
         }
         list.appendChild(node);
       }
@@ -1150,8 +1327,14 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
       el('#empty-desc').textContent = isEmpty
         ? 'Ketik istilah di atas untuk mulai. AI akan bantu isi pinyin & arti.'
         : 'Coba ganti kata kunci atau reset filter kategori ke "Semua".';
-      const needKey = isEmpty && !state.settings.apiKey && !state.settings.endpoint;
-      el('#empty-hint').hidden = !needKey;
+      const needSetup = isEmpty && !isShared() && !state.settings.geminiKey;
+      const hint = el('#empty-hint');
+      if (needSetup) {
+        hint.textContent = '⚙️ Buka Pengaturan dulu — isi Worker URL + Token (kamus tim) atau Gemini API Key (solo)';
+        hint.hidden = false;
+      } else {
+        hint.hidden = true;
+      }
     } else {
       empty.hidden = true;
       list.style.display = '';
@@ -1214,10 +1397,9 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     el('#q-add').disabled = v;
   }
 
-  function acceptDraft() {
+  async function acceptDraft() {
     if (!state.pending) return;
     const d = {
-      ...state.pending,
       hanzi: state.pending.hanzi.trim(),
       pinyin: state.pending.pinyin.trim(),
       indonesia: state.pending.indonesia.trim(),
@@ -1233,12 +1415,28 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
       renderDraft();
       return;
     }
-    state.entries = [newEntry(d), ...state.entries];
-    saveEntries();
-    state.pending = null;
-    clearAlert();
-    render();
-    toast('✅ "' + d.hanzi + '" tersimpan', 'success');
+
+    if (isShared() && state.mode !== 'offline') {
+      try {
+        const entry = await remoteAdd(d);
+        state.entries = [entry, ...state.entries];
+        saveEntries();
+        state.pending = null;
+        clearAlert();
+        render();
+        toast('✅ "' + d.hanzi + '" tersimpan (sync)', 'success');
+      } catch (e) {
+        if (e.status === 409) toast('Kata ini sudah ada di server', 'error');
+        else toast('Gagal simpan ke server: ' + e.message.slice(0, 60), 'error');
+      }
+    } else {
+      state.entries = [newEntry(d), ...state.entries];
+      saveEntries();
+      state.pending = null;
+      clearAlert();
+      render();
+      toast('✅ "' + d.hanzi + '" tersimpan', 'success');
+    }
   }
 
   function cancelDraft() {
@@ -1252,21 +1450,35 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     state.editingDraft = { ...state.entries.find(e => e.id === id) };
     renderList();
   }
-  function saveEdit() {
+  async function saveEdit() {
     if (!state.editingDraft) return;
     const d = state.editingDraft;
     if (!d.hanzi.trim() || !d.indonesia.trim()) {
       toast('Hanzi & arti wajib diisi', 'error');
       return;
     }
-    state.entries = state.entries.map(e => e.id === state.editingId ? {
-      ...e,
+    const patch = {
       hanzi: d.hanzi.trim(),
       pinyin: d.pinyin.trim(),
       indonesia: d.indonesia.trim(),
       kategori: normalizeCategory(d.kategori),
       contoh: d.contoh.trim(),
-    } : e);
+    };
+    const id = state.editingId;
+
+    if (isShared() && state.mode === 'admin') {
+      try {
+        const updated = await remoteEdit(id, patch);
+        state.entries = state.entries.map(e => e.id === id ? updated : e);
+      } catch (e) {
+        toast('Gagal edit di server: ' + e.message.slice(0, 60), 'error');
+        return;
+      }
+    } else if (isShared() && state.mode === 'team') {
+      toast('Cuma admin yang bisa edit', 'error'); return;
+    } else {
+      state.entries = state.entries.map(e => e.id === id ? { ...e, ...patch } : e);
+    }
     saveEntries();
     state.editingId = null;
     state.editingDraft = null;
@@ -1279,10 +1491,16 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     renderList();
   }
 
-  function deleteEntry(id) {
+  async function deleteEntry(id) {
     const entry = state.entries.find(e => e.id === id);
     if (!entry) return;
+    if (isShared() && state.mode === 'team') { toast('Cuma admin yang bisa hapus', 'error'); return; }
     if (!confirm(`Hapus "${entry.hanzi}" (${entry.indonesia}) dari kamus?`)) return;
+
+    if (isShared() && state.mode === 'admin') {
+      try { await remoteDelete(id); }
+      catch (e) { toast('Gagal hapus di server: ' + e.message.slice(0, 60), 'error'); return; }
+    }
     state.entries = state.entries.filter(e => e.id !== id);
     saveEntries();
     render();
@@ -1399,7 +1617,21 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     }
   }
 
-  function mergeImported(incoming) {
+  async function mergeImported(incoming) {
+    if (isShared() && state.mode === 'admin') {
+      try {
+        const result = await remoteBulkUpload(incoming);
+        if (!result.added) { toast('Semua kata di file sudah ada di server', ''); return; }
+        await syncFromRemote();
+        toast(`⬆ ${result.added} kata di-upload ke server`, 'success');
+      } catch (e) {
+        toast('Gagal upload: ' + e.message.slice(0, 60), 'error');
+      }
+      return;
+    }
+    if (isShared() && state.mode === 'team') {
+      toast('Cuma admin yang bisa import ke server', 'error'); return;
+    }
     const seen = new Set(state.entries.map(e => e.hanzi + '|' + e.indonesia));
     const added = [];
     for (const e of incoming) {
@@ -1459,27 +1691,79 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     const scrim = el('#drawer-scrim');
     scrim.hidden = false;
     requestAnimationFrame(() => scrim.classList.add('show'));
-    el('#s-endpoint').value = state.settings.endpoint || '';
-    el('#s-key').value = state.settings.apiKey || '';
+    el('#s-worker').value = state.settings.workerUrl || '';
+    el('#s-token').value = state.settings.token || '';
+    el('#s-name').value = state.settings.userName || '';
+    el('#s-gemini').value = state.settings.geminiKey || '';
   }
-  function closeDrawer() {
+  async function closeDrawer() {
     const drawer = el('#drawer');
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     const scrim = el('#drawer-scrim');
     scrim.classList.remove('show');
     setTimeout(() => { scrim.hidden = true; }, 220);
-    state.settings.endpoint = el('#s-endpoint').value.trim();
-    state.settings.apiKey = el('#s-key').value.trim();
+
+    const prevShared = isShared();
+    state.settings.workerUrl = normalizeWorkerUrl(el('#s-worker').value);
+    state.settings.token = el('#s-token').value.trim();
+    state.settings.userName = el('#s-name').value.trim();
+    state.settings.geminiKey = el('#s-gemini').value.trim();
     saveSettings();
+
+    // If shared mode just enabled or changed, sync now
+    if (isShared()) {
+      await syncFromRemote();
+      // Offer to upload local entries if server empty
+      if (state.mode === 'admin' && state.entries.length === 0) {
+        const local = getLocalOnly();
+        if (local.length && confirm(`Server kosong. Upload ${local.length} kata lokal kamu ke server?`)) {
+          await uploadLocalToRemote(local);
+        }
+      }
+    } else {
+      state.mode = 'local';
+      state.syncError = null;
+    }
+    renderSync();
     updateEmptyState();
+  }
+
+  // ─── Migration helper ────────────────────────────────────────
+  function getLocalOnly() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+  async function uploadLocalToRemote(entries) {
+    try {
+      const result = await remoteBulkUpload(entries);
+      toast(`⬆ ${result.added} kata lokal terupload`, 'success');
+      await syncFromRemote();
+    } catch (e) {
+      toast('Gagal upload: ' + e.message.slice(0, 60), 'error');
+    }
   }
 
   // ─── Init ────────────────────────────────────────────────────
   function init() {
     loadEntries();
     loadSettings();
+    // Initial mode
+    state.mode = isShared() ? 'team' : 'local'; // will be refined by first sync
     render();
+
+    // Initial sync if shared mode configured
+    if (isShared()) {
+      syncFromRemote();
+      // Auto-poll
+      setInterval(() => {
+        if (isShared() && !document.hidden && !state.syncing) syncFromRemote();
+      }, SYNC_INTERVAL_MS);
+      // Sync on tab focus
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && isShared() && !state.syncing) syncFromRemote();
+      });
+    }
 
     el('#search-form').addEventListener('submit', onSearch);
     el('#q-filter').addEventListener('input', ev => {

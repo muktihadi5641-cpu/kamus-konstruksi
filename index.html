@@ -619,6 +619,46 @@
   .btn-mini.danger:hover { background: rgba(232,93,93,.1); border-color: var(--danger); }
   .btn-mini:disabled { opacity: 0.4; cursor: not-allowed; }
 
+  .save-section {
+    background: linear-gradient(180deg, rgba(255,138,61,.06), var(--bg-1));
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-bottom: 24px;
+  }
+  .btn-save-big {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .1s ease, background .15s ease, box-shadow .15s ease;
+    box-shadow: 0 4px 12px rgba(255,138,61,.24);
+  }
+  .btn-save-big:hover { background: var(--accent-hi); box-shadow: 0 6px 16px rgba(255,138,61,.32); }
+  .btn-save-big:active { transform: translateY(1px); background: var(--accent-lo); }
+  .btn-save-big:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 3px; }
+  .btn-save-big:disabled {
+    background: var(--bg-3); color: var(--text-3);
+    box-shadow: none; cursor: not-allowed;
+  }
+  .btn-save-big:disabled:active { transform: none; }
+  .btn-save-big.success {
+    background: var(--success);
+    color: #0A2A17;
+    animation: savedPop .35s ease;
+  }
+  @keyframes savedPop { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+  .save-hint { margin-top: 12px !important; }
+
   /* ─── Toast ─── */
   #toast-slot {
     position: fixed;
@@ -773,7 +813,6 @@
         <p class="hint">
           Isi Worker URL & Token buat sync ke kamus bersama tim. Kalau punya <b>Admin Token</b>, kamu bisa edit/hapus juga.
           Nama akan muncul sebagai "ditambahkan oleh …" di kartu yang kamu tambah.
-          Lihat <code>README-DEPLOY.md</code> untuk cara deploy worker.
         </p>
       </div>
 
@@ -786,6 +825,18 @@
         <p class="hint">
           Ini hanya perlu diisi kalau <b>Worker URL kosong</b> — buat pakai app solo tanpa server bersama. Data disimpan lokal di HP.
           Kalau kamu sudah pakai Worker di atas, kosongkan bagian ini — key Gemini sudah di server.
+        </p>
+      </div>
+
+      <div class="drawer-section save-section">
+        <button class="btn-save-big" id="btn-save-settings">
+          <span class="spinner" hidden></span>
+          <span class="btn-label">💾 Simpan &amp; Sync Sekarang</span>
+        </button>
+        <p class="hint save-hint">
+          ✅ Pengaturan tersimpan permanen di HP kamu (LocalStorage).
+          Setelah simpan sekali, kamu tidak perlu setup ulang — buka app kapan aja langsung jalan.
+          Kalau ganti HP / clear browser data, baru perlu setup lagi.
         </p>
       </div>
 
@@ -1696,25 +1747,17 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     el('#s-name').value = state.settings.userName || '';
     el('#s-gemini').value = state.settings.geminiKey || '';
   }
-  async function closeDrawer() {
-    const drawer = el('#drawer');
-    drawer.classList.remove('open');
-    drawer.setAttribute('aria-hidden', 'true');
-    const scrim = el('#drawer-scrim');
-    scrim.classList.remove('show');
-    setTimeout(() => { scrim.hidden = true; }, 220);
-
-    const prevShared = isShared();
+  function readSettingsFromForm() {
     state.settings.workerUrl = normalizeWorkerUrl(el('#s-worker').value);
     state.settings.token = el('#s-token').value.trim();
     state.settings.userName = el('#s-name').value.trim();
     state.settings.geminiKey = el('#s-gemini').value.trim();
     saveSettings();
+  }
 
-    // If shared mode just enabled or changed, sync now
+  async function applySettingsChange() {
     if (isShared()) {
       await syncFromRemote();
-      // Offer to upload local entries if server empty
       if (state.mode === 'admin' && state.entries.length === 0) {
         const local = getLocalOnly();
         if (local.length && confirm(`Server kosong. Upload ${local.length} kata lokal kamu ke server?`)) {
@@ -1727,6 +1770,47 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     }
     renderSync();
     updateEmptyState();
+  }
+
+  async function closeDrawer() {
+    const drawer = el('#drawer');
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    const scrim = el('#drawer-scrim');
+    scrim.classList.remove('show');
+    setTimeout(() => { scrim.hidden = true; }, 220);
+
+    readSettingsFromForm();
+    await applySettingsChange();
+  }
+
+  async function saveSettingsBtn() {
+    const btn = el('#btn-save-settings');
+    const label = el('.btn-label', btn);
+    const spin = el('.spinner', btn);
+    btn.disabled = true;
+    spin.hidden = false;
+    label.textContent = 'Menyimpan…';
+
+    readSettingsFromForm();
+    try {
+      await applySettingsChange();
+      // Success feedback
+      btn.classList.add('success');
+      label.textContent = '✅ Tersimpan';
+      spin.hidden = true;
+      toast('✅ Pengaturan tersimpan permanen', 'success');
+      setTimeout(() => {
+        btn.classList.remove('success');
+        label.textContent = '💾 Simpan & Sync Sekarang';
+        btn.disabled = false;
+      }, 1600);
+    } catch (e) {
+      btn.disabled = false;
+      spin.hidden = true;
+      label.textContent = '💾 Simpan & Sync Sekarang';
+      toast('Gagal sync: ' + (e.message || 'unknown').slice(0, 60), 'error');
+    }
   }
 
   // ─── Migration helper ────────────────────────────────────────
@@ -1801,6 +1885,7 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     el('#btn-open-settings').addEventListener('click', openDrawer);
     el('#btn-close-settings').addEventListener('click', closeDrawer);
     el('#drawer-scrim').addEventListener('click', closeDrawer);
+    el('#btn-save-settings').addEventListener('click', saveSettingsBtn);
 
     el('#btn-export-json').addEventListener('click', exportJSON);
     el('#btn-export-csv').addEventListener('click', exportCSV);

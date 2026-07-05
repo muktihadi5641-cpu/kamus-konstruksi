@@ -1,0 +1,16 @@
+name = "kamus-proxy"
+main = "worker.js"
+compatibility_date = "2025-11-01"
+
+# KV namespace binding — akan di-populate otomatis
+kv_namespaces = [
+  { binding = "KAMUS", id = "eb838679c0e440e283495826ffc6dac9" }
+]
+
+[vars]
+ALLOWED_ORIGIN = "https://muktihadi5641-cpu.github.io"
+
+# Secrets di-set via `wrangler secret put ...`, bukan di file ini:
+# - GEMINI_API_KEY
+# - TEAM_TOKEN
+# - ADMIN_TOKEN

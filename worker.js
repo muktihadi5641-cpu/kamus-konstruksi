@@ -24,11 +24,12 @@
 // ─────────────────────────────────────────────────────────────
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+// gemini-2.5-flash-lite has 4x more daily quota (1000 vs 250) and no
+// "thinking token" overhead that inflates cost + can truncate JSON.
+const DEFAULT_MODEL = 'gemini-2.5-flash-lite';
 const ALLOWED_MODELS = new Set([
-  'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
-  'gemini-2.0-flash',
+  'gemini-2.5-flash',
   'gemini-2.0-flash-lite',
 ]);
 const MAX_TOKENS_CAP = 2000;

@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0A08">
+<meta name="description" content="Kamus konstruksi Mandarin Taiwan-Indonesia untuk pekerja proyek">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kamus">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230B0A08' rx='18'/%3E%3Ctext x='50' y='72' font-size='60' text-anchor='middle'%3E%F0%9F%8F%97%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23FF8A3D' rx='36'/%3E%3Ctext x='90' y='128' font-size='100' text-anchor='middle'%3E%F0%9F%8F%97%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<title>Kamus Konstruksi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@500;700;900&display=swap">
+<style>
+  :root {
+    --bg-0: #0B0A08;
+    --bg-1: #161412;
+    --bg-2: #221F1B;
+    --bg-3: #2E2A25;
+    --border: #2E2A25;
+    --border-strong: #4A433B;
+    --text-1: #F5F0E8;
+    --text-2: #B8AFA0;
+    --text-3: #7A7264;
+    --accent: #FF8A3D;
+    --accent-hi: #FFA063;
+    --accent-lo: #E67428;
+    --accent-ink: #1A0E05;
+    --success: #6FCF97;
+    --danger: #E85D5D;
+    --info: #5AA9E6;
+
+    --cat-alat: #E9A23B;
+    --cat-alatberat: #D64545;
+    --cat-material: #2E9E63;
+    --cat-struktur: #7C51D6;
+    --cat-keselamatan: #E8B923;
+    --cat-proses: #3B9EDD;
+    --cat-ukuran: #4FB5B5;
+    --cat-umum: #8A8172;
+
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow-1: 0 1px 2px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.25);
+    --shadow-2: 0 4px 12px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.3);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg-0);
+    color: var(--text-1);
+    font-family: 'Archivo', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(1200px 500px at 80% -200px, rgba(255,138,61,.08), transparent 60%),
+      radial-gradient(800px 400px at -100px 100%, rgba(124,81,214,.05), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -0.01em; }
+  button { font-family: inherit; }
+  input, select, textarea { font-family: inherit; }
+
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+
+  /* ─── Topbar ─── */
+  .topbar {
+    position: sticky; top: 0;
+    background: rgba(11, 10, 8, 0.92);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+    padding-top: var(--safe-top);
+  }
+  .topbar-inner {
+    max-width: 960px; margin: 0 auto;
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .brand-mark {
+    width: 40px; height: 40px; flex-shrink: 0;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-lo));
+    border-radius: 10px;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(255,138,61,.28), inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  .brand h1 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -0.015em;
+  }
+  .brand-sub {
+    margin: 1px 0 0;
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .brand-sub .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px rgba(111,207,151,.6);
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: transform .12s ease, background .12s ease, color .12s ease, border-color .12s ease;
+    padding: 0;
+  }
+  .icon-btn:hover { color: var(--accent); border-color: var(--border-strong); }
+  .icon-btn:active { transform: scale(0.94); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .icon-btn svg { width: 20px; height: 20px; }
+
+  /* ─── Container ─── */
+  .container {
+    max-width: 960px; margin: 0 auto;
+    padding: 20px 16px calc(120px + var(--safe-bottom));
+    position: relative; z-index: 1;
+  }
+
+  /* ─── Search form ─── */
+  .search {
+    display: flex; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .search input {
+    flex: 1;
+    padding: 14px 16px;
+    background: var(--bg-1);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--text-1);
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .search input::placeholder { color: var(--text-3); font-weight: 400; }
+  .search input:focus { border-color: var(--accent); background: var(--bg-2); }
+
+  .btn-primary {
+    padding: 14px 18px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+    transition: transform .1s ease, background .15s ease, box-shadow .15s ease;
+    box-shadow: 0 4px 12px rgba(255,138,61,.24);
+  }
+  .btn-primary:hover { background: var(--accent-hi); box-shadow: 0 6px 16px rgba(255,138,61,.32); }
+  .btn-primary:active { transform: translateY(1px); background: var(--accent-lo); }
+  .btn-primary:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 3px; }
+  .btn-primary:disabled {
+    background: var(--bg-3); color: var(--text-3);
+    box-shadow: none; cursor: not-allowed;
+  }
+  .btn-primary:disabled:active { transform: none; }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(26,14,5,.3);
+    border-top-color: var(--accent-ink);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── Alert / notice ─── */
+  .alert {
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+    animation: slideIn .2s ease;
+  }
+  .alert-error {
+    background: rgba(232,93,93,.1);
+    color: #FCA5A5;
+    border: 1px solid rgba(232,93,93,.35);
+  }
+  .alert-ok {
+    background: rgba(111,207,151,.1);
+    color: #A7EBC2;
+    border: 1px solid rgba(111,207,151,.35);
+  }
+  .alert-info {
+    background: rgba(90,169,230,.1);
+    color: #A9D2F2;
+    border: 1px solid rgba(90,169,230,.35);
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ─── Draft card (HITL) ─── */
+  .draft {
+    background: linear-gradient(180deg, rgba(255,138,61,.06), var(--bg-1));
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-2);
+    animation: slideIn .2s ease;
+  }
+  .draft-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .draft-label::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .field label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .field input, .field select, .field textarea {
+    padding: 10px 12px;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .12s ease;
+    width: 100%;
+  }
+  .field textarea { resize: vertical; min-height: 60px; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field .hanzi-input { font-family: 'Noto Sans TC', sans-serif; font-size: 18px; font-weight: 700; }
+  .field .pinyin-input { font-family: 'JetBrains Mono', monospace; }
+
+  .draft-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-save {
+    flex: 1;
+    padding: 12px;
+    background: var(--success);
+    color: #0A2A17;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .1s ease, filter .15s ease;
+  }
+  .btn-save:hover { filter: brightness(1.08); }
+  .btn-save:active { transform: translateY(1px); }
+  .btn-save:disabled { background: var(--bg-3); color: var(--text-3); cursor: not-allowed; }
+  .btn-save:disabled:active { transform: none; }
+  .btn-save:focus-visible { outline: 2px solid var(--success); outline-offset: 2px; }
+  .btn-ghost {
+    padding: 12px 18px;
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .1s ease, background .12s ease, color .12s ease;
+  }
+  .btn-ghost:hover { background: var(--bg-2); color: var(--text-1); }
+  .btn-ghost:active { transform: translateY(1px); }
+  .btn-ghost:focus-visible { outline: 2px solid var(--text-2); outline-offset: 2px; }
+
+  /* ─── Filter section ─── */
+  .filter-section {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  .filter-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-1);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .12s ease;
+    margin-bottom: 10px;
+  }
+  .filter-input:focus { border-color: var(--accent); }
+  .filter-input::placeholder { color: var(--text-3); }
+
+  .cat-pills {
+    display: flex; gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cat-pills::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    background: var(--bg-2);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s ease, background .15s ease, color .15s ease, border-color .15s ease;
+    scroll-snap-align: start;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .cat-pill:hover { background: var(--bg-3); color: var(--text-1); }
+  .cat-pill:active { transform: scale(0.96); }
+  .cat-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cat-pill.active {
+    background: var(--pill-color, var(--accent));
+    color: var(--accent-ink);
+    border-color: transparent;
+  }
+
+  /* ─── List ─── */
+  .list-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--text-3);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 900px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    position: relative;
+    transition: transform .12s ease, border-color .12s ease;
+    display: flex; flex-direction: column;
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card::before {
+    content: "";
+    position: absolute; left: 0; top: 12px; bottom: 12px;
+    width: 3px;
+    background: var(--card-accent, var(--cat-umum));
+    border-radius: 0 3px 3px 0;
+  }
+  .card-tag {
+    position: absolute; top: 12px; right: 12px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--card-tag-bg);
+    color: var(--card-accent);
+  }
+  .card-hanzi {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--text-1);
+    padding-right: 80px;
+    margin-bottom: 4px;
+    word-break: break-word;
+  }
+  .card-pinyin {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-hi);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+  }
+  .card-indo {
+    font-size: 15px;
+    color: var(--text-1);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .card-note {
+    font-size: 12px;
+    color: var(--text-3);
+    font-style: italic;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+  .card-actions {
+    display: flex; gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .card-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    cursor: pointer;
+    display: grid; place-items: center;
+    padding: 0;
+    transition: transform .1s ease, color .12s ease, background .12s ease;
+  }
+  .card-btn:hover { background: var(--bg-3); color: var(--text-1); }
+  .card-btn:active { transform: scale(0.9); }
+  .card-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card-btn.danger:hover { color: var(--danger); }
+  .card-btn svg { width: 16px; height: 16px; }
+
+  /* Edit mode card */
+  .card.editing {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(255,138,61,.05), var(--bg-1));
+  }
+
+  /* ─── Empty state ─── */
+  .empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-3);
+  }
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+  .empty h3 {
+    font-size: 16px;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+  .empty p { font-size: 13px; margin: 0; }
+  .empty .hint {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 14px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ─── Drawer (settings) ─── */
+  .drawer-scrim {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 40;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .drawer-scrim.show { opacity: 1; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(400px, 100vw);
+    background: var(--bg-1);
+    border-left: 1px solid var(--border);
+    z-index: 50;
+    transform: translateX(100%);
+    transition: transform .25s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex; flex-direction: column;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+  .drawer.open { transform: translateX(0); box-shadow: -8px 0 32px rgba(0,0,0,.5); }
+
+  .drawer-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .drawer-head h2 { font-size: 16px; color: var(--text-1); }
+  .drawer-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .drawer-section {
+    margin-bottom: 24px;
+  }
+  .drawer-section-title {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .drawer-section p.hint {
+    font-size: 12px;
+    color: var(--text-3);
+    line-height: 1.5;
+    margin: 6px 0 0;
+  }
+  .drawer-section p.hint code {
+    background: var(--bg-0);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-hi);
+  }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn-mini {
+    padding: 8px 14px;
+    background: var(--bg-2);
+    color: var(--text-1);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s ease, background .12s ease, border-color .12s ease;
+  }
+  .btn-mini:hover { background: var(--bg-3); border-color: var(--text-3); }
+  .btn-mini:active { transform: translateY(1px); }
+  .btn-mini:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-mini.danger { color: var(--danger); border-color: rgba(232,93,93,.3); }
+  .btn-mini.danger:hover { background: rgba(232,93,93,.1); border-color: var(--danger); }
+  .btn-mini:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ─── Toast ─── */
+  #toast-slot {
+    position: fixed;
+    bottom: calc(24px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex; flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 10px 18px;
+    background: var(--bg-3);
+    color: var(--text-1);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-2);
+    border: 1px solid var(--border-strong);
+    animation: toastIn .25s ease, toastOut .25s ease 2.7s forwards;
+    pointer-events: auto;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.success { border-color: rgba(111,207,151,.5); color: #A7EBC2; }
+  .toast.error { border-color: rgba(232,93,93,.5); color: #FCA5A5; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  }
+
+  /* ─── Utilities ─── */
+  [hidden] { display: none !important; }
+
+  /* ─── Small screen tweaks ─── */
+  @media (max-width: 480px) {
+    .brand h1 { font-size: 15px; }
+    .brand-sub { font-size: 11px; }
+    .btn-primary { padding: 14px; font-size: 13px; }
+    .btn-primary .btn-label { display: none; }
+    .btn-primary::before { content: "🔍"; font-size: 18px; }
+    .btn-primary .spinner + .btn-label { display: inline; }
+    .container { padding: 16px 12px calc(120px + var(--safe-bottom)); }
+    .search input { padding: 12px 14px; font-size: 15px; }
+    .card-hanzi { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🏗️</span>
+        <div>
+          <h1>Kamus Konstruksi</h1>
+          <p class="brand-sub"><span id="count-word">0</span> kata · <span class="dot" aria-hidden="true"></span> tersimpan lokal</p>
+        </div>
+      </div>
+      <button class="icon-btn" id="btn-open-settings" aria-label="Pengaturan" title="Pengaturan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <form class="search" id="search-form">
+      <input
+        id="q-add"
+        type="text"
+        placeholder="鋼筋, gāngjīn, atau 'besi tulangan'..."
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+        aria-label="Ketik hanzi, pinyin, atau kata Indonesia"
+      />
+      <button type="submit" id="btn-add" class="btn-primary">
+        <span class="spinner" hidden></span>
+        <span class="btn-label">Cari &amp; Tambah</span>
+      </button>
+    </form>
+
+    <div id="alert-slot"></div>
+    <div id="draft-slot"></div>
+
+    <section class="filter-section" aria-label="Filter kata tersimpan">
+      <input
+        id="q-filter"
+        type="search"
+        class="filter-input"
+        placeholder="Filter kata tersimpan (hanzi, pinyin, arti…)"
+        autocomplete="off"
+      />
+      <div class="cat-pills" id="cat-pills" role="tablist"></div>
+    </section>
+
+    <div class="list-meta">
+      <span id="list-count">0 dari 0 kata</span>
+    </div>
+
+    <div id="list" class="grid" aria-live="polite"></div>
+
+    <div id="empty-state" class="empty" hidden>
+      <div class="empty-icon">📭</div>
+      <h3 id="empty-title">Kamus masih kosong</h3>
+      <p id="empty-desc">Ketik istilah di atas untuk mulai. AI akan bantu isi pinyin & arti.</p>
+      <span class="hint" id="empty-hint" hidden>💡 Set API key di ⚙️ Pengaturan dulu supaya AI auto-fill jalan</span>
+    </div>
+  </main>
+
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Pengaturan">
+    <div class="drawer-head">
+      <h2>⚙️ Pengaturan</h2>
+      <button class="icon-btn" id="btn-close-settings" aria-label="Tutup pengaturan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">🤖 Gemini API (Gratis)</div>
+        <div class="field">
+          <label for="s-endpoint">Endpoint</label>
+          <input id="s-endpoint" type="text" placeholder="Kosongkan = pakai Gemini default" />
+        </div>
+        <div class="field">
+          <label for="s-key">API Key</label>
+          <input id="s-key" type="password" placeholder="AIza... (dari aistudio.google.com)" autocomplete="off" />
+        </div>
+        <p class="hint">
+          Ambil API key <b>gratis</b> di <code>aistudio.google.com/apikey</code> — cukup login Google, no kartu kredit.
+          Limit gratisnya <b>1500 request/hari</b>, cukup banget buat kamus. Kalau nanti mau share tanpa teman perlu key sendiri,
+          deploy <code>worker.js</code> ke Cloudflare (lihat README-DEPLOY.md), lalu ganti Endpoint dengan URL worker-mu.
+          Semua data disimpan lokal di HP kamu.
+        </p>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">💾 Backup &amp; Restore</div>
+        <div class="btn-row">
+          <button class="btn-mini" id="btn-export-json">⬇ Backup JSON</button>
+          <button class="btn-mini" id="btn-export-csv">⬇ Export CSV</button>
+          <button class="btn-mini" id="btn-import">⬆ Import File</button>
+          <input type="file" id="file-import" accept=".json,.csv" hidden />
+        </div>
+        <p class="hint">
+          Kata-katamu <b>otomatis tersimpan</b> di browser HP ini. Backup ke file supaya kalau hapus browser tidak hilang,
+          atau untuk share antar device.
+        </p>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">📋 Clipboard (Backup Cepat)</div>
+        <div class="btn-row">
+          <button class="btn-mini" id="btn-copy-clip">📋 Salin Semua</button>
+          <button class="btn-mini" id="btn-paste-clip">📥 Tempel Data</button>
+        </div>
+        <p class="hint">Salin ke WhatsApp/Notes sebagai cadangan cepat waktu tidak sempat backup file.</p>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">🗑 Zona Bahaya</div>
+        <div class="btn-row">
+          <button class="btn-mini danger" id="btn-clear-all">Hapus Semua Kata</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-title">ℹ️ Tentang</div>
+        <p class="hint">
+          v1.0 · Buat pekerja magang konstruksi di Taiwan · Data 100% offline di HP kamu.<br>
+          Font: Archivo · Noto Sans TC · JetBrains Mono
+        </p>
+      </div>
+
+    </div>
+  </aside>
+  <div class="drawer-scrim" id="drawer-scrim" hidden></div>
+
+  <div id="toast-slot" role="status" aria-live="polite"></div>
+</div>
+
+<template id="tpl-card">
+  <div class="card">
+    <span class="card-tag"></span>
+    <div class="card-hanzi"></div>
+    <div class="card-pinyin"></div>
+    <div class="card-indo"></div>
+    <div class="card-note" hidden></div>
+    <div class="card-actions">
+      <button class="card-btn" data-act="edit" aria-label="Edit kata" title="Edit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        </svg>
+      </button>
+      <button class="card-btn danger" data-act="delete" aria-label="Hapus kata" title="Hapus">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</template>
+
+<script>
+(() => {
+  'use strict';
+
+  // ─── Constants ───────────────────────────────────────────────
+  const STORAGE_KEY = 'kamus-konstruksi-v1';
+  const SETTINGS_KEY = 'kamus-konstruksi-settings-v1';
+  const CATS = ['Alat', 'Alat Berat', 'Material', 'Struktur', 'Keselamatan', 'Proses', 'Ukuran', 'Umum'];
+  const CAT_VAR = {
+    'Alat': '--cat-alat',
+    'Alat Berat': '--cat-alatberat',
+    'Material': '--cat-material',
+    'Struktur': '--cat-struktur',
+    'Keselamatan': '--cat-keselamatan',
+    'Proses': '--cat-proses',
+    'Ukuran': '--cat-ukuran',
+    'Umum': '--cat-umum',
+  };
+
+  const GEMINI_MODEL = 'gemini-2.5-flash';
+  const DEFAULT_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+  // ─── State ───────────────────────────────────────────────────
+  const state = {
+    entries: [],
+    query: '',
+    cat: 'Semua',
+    pending: null,
+    editingId: null,
+    editingDraft: null,
+    settings: {
+      endpoint: '',
+      apiKey: '',
+    },
+    loading: false,
+  };
+
+  // ─── Storage ─────────────────────────────────────────────────
+  function loadEntries() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) state.entries = JSON.parse(raw);
+    } catch (e) { console.warn('Load entries failed', e); }
+  }
+  function saveEntries() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.entries)); }
+    catch (e) { toast('Gagal simpan lokal — storage mungkin penuh', 'error'); }
+  }
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (raw) state.settings = { ...state.settings, ...JSON.parse(raw) };
+    } catch (e) {}
+  }
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings)); }
+    catch (e) {}
+  }
+
+  // ─── Utilities ───────────────────────────────────────────────
+  function makeId() {
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+  }
+  function newEntry(fields) {
+    return {
+      id: makeId(),
+      hanzi: '', pinyin: '', indonesia: '', kategori: 'Umum', contoh: '',
+      createdAt: Date.now(),
+      ...fields,
+    };
+  }
+  function normalizeCategory(c) {
+    if (!c) return 'Umum';
+    const s = String(c).trim();
+    const found = CATS.find(cat => cat.toLowerCase() === s.toLowerCase());
+    return found || 'Umum';
+  }
+  function el(sel, root = document) { return root.querySelector(sel); }
+  function els(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  // ─── AI Prompt ───────────────────────────────────────────────
+  function buildPrompt(term) {
+    return `Kamu adalah kamus istilah konstruksi Bahasa Mandarin Tradisional (Taiwan) untuk pekerja asal Indonesia di lokasi proyek.
+
+Input pengguna bisa berupa: aksara Mandarin Tradisional (繁體字), pinyin, tulisan perkiraan dari BUNYI yang didengar di lokasi, atau kata Bahasa Indonesia yang ingin diterjemahkan ke Mandarin. Sebagian istilah mungkin bahasa Taiwan/Hokkien (台語) yang lazim dipakai kuli/mandor di lokasi — jika begitu, berikan bentuk tulisan bakunya dan sebutkan di catatan.
+
+Input pengguna: "${term}"
+
+Balas HANYA dengan satu objek JSON valid. Tanpa markdown, tanpa \`\`\`, tanpa kalimat pembuka. Field:
+- "hanzi": istilah dalam aksara Mandarin Tradisional (繁體字)
+- "pinyin": Hanyu Pinyin dengan tanda nada, contoh: gāngjīn
+- "indonesia": arti dalam Bahasa Indonesia yang jelas dan praktis untuk konteks konstruksi
+- "kategori": PILIH SATU dari daftar ini persis: Alat, Alat Berat, Material, Struktur, Keselamatan, Proses, Ukuran, Umum
+  - "Alat" = perkakas tangan (palu, obeng, gergaji, waterpass)
+  - "Alat Berat" = kendaraan/mesin besar (excavator/挖土機, crane/吊車, dump truck/砂石車, forklift)
+  - "Material" = bahan bangunan (semen, besi, kayu, cat)
+  - "Struktur" = elemen struktur (pondasi/fondasi, kolom, balok, pelat, dinding)
+  - "Keselamatan" = APD & keselamatan (helm, harness, safety net)
+  - "Proses" = pekerjaan/aksi (pengecoran, pengelasan, bekisting)
+  - "Ukuran" = dimensi & satuan (meter, milimeter, mutu beton)
+  - "Umum" = istilah umum yang tidak masuk kategori di atas
+- "contoh": satu contoh pemakaian singkat (frasa umum di lokasi + artinya) ATAU catatan singkat. Boleh memuat aksara Mandarin. Singkat.
+
+Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terbaik lalu tulis ketidakpastiannya di "contoh".`;
+  }
+
+  function extractJSON(text) {
+    let t = (text || '').replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = t.indexOf('{');
+    const end = t.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      try { return JSON.parse(t.slice(start, end + 1)); } catch (e) {}
+    }
+    try { return JSON.parse(t); } catch (e) {}
+    return null;
+  }
+
+  // ─── AI Call ─────────────────────────────────────────────────
+  async function lookupTerm(term) {
+    const endpoint = state.settings.endpoint?.trim() || DEFAULT_ENDPOINT;
+    const isGeminiDirect = endpoint.includes('generativelanguage.googleapis.com');
+    const key = state.settings.apiKey?.trim() || '';
+
+    if (isGeminiDirect && !key) throw new Error('MISSING_KEY');
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (isGeminiDirect) {
+      headers['x-goog-api-key'] = key;
+    } else if (key) {
+      headers['Authorization'] = 'Bearer ' + key;
+    }
+
+    const body = {
+      contents: [{ parts: [{ text: buildPrompt(term) }] }],
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 1000,
+        responseMimeType: 'application/json',
+      },
+    };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+    }
+    const data = await res.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const parsed = extractJSON(raw);
+    if (!parsed || !parsed.hanzi) throw new Error('BAD_JSON');
+    return {
+      hanzi: String(parsed.hanzi || '').trim(),
+      pinyin: String(parsed.pinyin || '').trim(),
+      indonesia: String(parsed.indonesia || '').trim(),
+      kategori: normalizeCategory(parsed.kategori),
+      contoh: String(parsed.contoh || '').trim(),
+    };
+  }
+
+  // ─── Rendering ───────────────────────────────────────────────
+  function render() {
+    renderCount();
+    renderPills();
+    renderList();
+    renderDraft();
+    updateEmptyState();
+  }
+
+  function renderCount() {
+    el('#count-word').textContent = state.entries.length;
+  }
+
+  function renderPills() {
+    const container = el('#cat-pills');
+    const all = ['Semua', ...CATS];
+    container.innerHTML = all.map(c => {
+      const active = c === state.cat;
+      const varName = c === 'Semua' ? '--accent' : CAT_VAR[c];
+      return `<button
+        class="cat-pill ${active ? 'active' : ''}"
+        data-cat="${escapeHtml(c)}"
+        style="--pill-color: var(${varName});"
+        role="tab"
+        aria-selected="${active}"
+      >${escapeHtml(c)}</button>`;
+    }).join('');
+  }
+
+  function getFiltered() {
+    const q = state.query.trim().toLowerCase();
+    return state.entries.filter(e => {
+      const catOk = state.cat === 'Semua' || e.kategori === state.cat;
+      if (!catOk) return false;
+      if (!q) return true;
+      return (
+        e.hanzi.toLowerCase().includes(q) ||
+        e.pinyin.toLowerCase().includes(q) ||
+        e.indonesia.toLowerCase().includes(q) ||
+        (e.contoh || '').toLowerCase().includes(q)
+      );
+    });
+  }
+
+  function renderList() {
+    const list = el('#list');
+    const filtered = getFiltered();
+    el('#list-count').textContent = `${filtered.length} dari ${state.entries.length} kata`;
+
+    list.innerHTML = '';
+    const tpl = el('#tpl-card');
+    filtered.forEach(entry => {
+      if (state.editingId === entry.id) {
+        list.appendChild(buildEditNode(entry));
+      } else {
+        const node = tpl.content.cloneNode(true);
+        const card = node.querySelector('.card');
+        const varName = CAT_VAR[entry.kategori] || '--cat-umum';
+        card.style.setProperty('--card-accent', `var(${varName})`);
+        card.style.setProperty('--card-tag-bg', `color-mix(in srgb, var(${varName}) 20%, transparent)`);
+        card.dataset.id = entry.id;
+
+        node.querySelector('.card-tag').textContent = entry.kategori;
+        node.querySelector('.card-hanzi').textContent = entry.hanzi;
+        node.querySelector('.card-pinyin').textContent = entry.pinyin || '—';
+        node.querySelector('.card-indo').textContent = entry.indonesia || '';
+        const noteEl = node.querySelector('.card-note');
+        if (entry.contoh) {
+          noteEl.textContent = entry.contoh;
+          noteEl.hidden = false;
+        }
+        list.appendChild(node);
+      }
+    });
+  }
+
+  function buildEditNode(entry) {
+    const d = state.editingDraft || { ...entry };
+    const wrap = document.createElement('div');
+    wrap.className = 'card editing';
+    wrap.dataset.id = entry.id;
+    wrap.innerHTML = `
+      <div class="field">
+        <label>漢字 / Hanzi</label>
+        <input class="hanzi-input" data-field="hanzi" value="${escapeHtml(d.hanzi)}" />
+      </div>
+      <div class="field">
+        <label>Pinyin</label>
+        <input class="pinyin-input" data-field="pinyin" value="${escapeHtml(d.pinyin)}" />
+      </div>
+      <div class="field">
+        <label>Arti Indonesia</label>
+        <input data-field="indonesia" value="${escapeHtml(d.indonesia)}" />
+      </div>
+      <div class="field">
+        <label>Kategori</label>
+        <select data-field="kategori">
+          ${CATS.map(c => `<option value="${escapeHtml(c)}" ${d.kategori === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Contoh / Catatan</label>
+        <textarea data-field="contoh" rows="2">${escapeHtml(d.contoh)}</textarea>
+      </div>
+      <div class="draft-actions">
+        <button class="btn-save" data-act="edit-save">💾 Simpan</button>
+        <button class="btn-ghost" data-act="edit-cancel">Batal</button>
+      </div>
+    `;
+    wrap.addEventListener('input', ev => {
+      const f = ev.target.dataset.field;
+      if (!f) return;
+      state.editingDraft = { ...(state.editingDraft || entry), [f]: ev.target.value };
+    });
+    return wrap;
+  }
+
+  function renderDraft() {
+    const slot = el('#draft-slot');
+    slot.innerHTML = '';
+    if (!state.pending) return;
+    const d = state.pending;
+    const canSave = d.hanzi.trim() && d.indonesia.trim();
+    const box = document.createElement('div');
+    box.className = 'draft';
+    box.innerHTML = `
+      <div class="draft-label">Draf Kata — Cek, Koreksi, Lalu Simpan</div>
+      <div class="field">
+        <label>漢字 / Hanzi</label>
+        <input class="hanzi-input" data-field="hanzi" value="${escapeHtml(d.hanzi)}" />
+      </div>
+      <div class="field">
+        <label>Pinyin</label>
+        <input class="pinyin-input" data-field="pinyin" value="${escapeHtml(d.pinyin)}" placeholder="gāngjīn" />
+      </div>
+      <div class="field">
+        <label>Arti Indonesia</label>
+        <input data-field="indonesia" value="${escapeHtml(d.indonesia)}" placeholder="besi tulangan" />
+      </div>
+      <div class="field">
+        <label>Kategori</label>
+        <select data-field="kategori">
+          ${CATS.map(c => `<option value="${escapeHtml(c)}" ${d.kategori === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Contoh / Catatan</label>
+        <textarea data-field="contoh" rows="2" placeholder="misal: 綁鋼筋 bǎng gāngjīn = mengikat besi">${escapeHtml(d.contoh)}</textarea>
+      </div>
+      <div class="draft-actions">
+        <button class="btn-save" data-act="draft-save" ${canSave ? '' : 'disabled'}>✅ Simpan ke Kamus</button>
+        <button class="btn-ghost" data-act="draft-cancel">Batal</button>
+      </div>
+    `;
+    box.addEventListener('input', ev => {
+      const f = ev.target.dataset.field;
+      if (!f) return;
+      state.pending = { ...state.pending, [f]: ev.target.value };
+      const btn = box.querySelector('[data-act="draft-save"]');
+      const ok = state.pending.hanzi.trim() && state.pending.indonesia.trim();
+      btn.disabled = !ok;
+    });
+    slot.appendChild(box);
+  }
+
+  function updateEmptyState() {
+    const empty = el('#empty-state');
+    const list = el('#list');
+    const filtered = getFiltered();
+    if (filtered.length === 0) {
+      empty.hidden = false;
+      list.style.display = 'none';
+      const isEmpty = state.entries.length === 0;
+      el('#empty-title').textContent = isEmpty ? 'Kamus masih kosong' : 'Tidak ada kata yang cocok';
+      el('#empty-desc').textContent = isEmpty
+        ? 'Ketik istilah di atas untuk mulai. AI akan bantu isi pinyin & arti.'
+        : 'Coba ganti kata kunci atau reset filter kategori ke "Semua".';
+      const needKey = isEmpty && !state.settings.apiKey && !state.settings.endpoint;
+      el('#empty-hint').hidden = !needKey;
+    } else {
+      empty.hidden = true;
+      list.style.display = '';
+    }
+  }
+
+  // ─── Alerts / Toast ──────────────────────────────────────────
+  function showAlert(msg, type = 'error') {
+    const slot = el('#alert-slot');
+    slot.innerHTML = `<div class="alert alert-${type}">${type === 'error' ? '⚠️' : type === 'ok' ? '✅' : 'ℹ️'} ${escapeHtml(msg)}</div>`;
+    if (type === 'ok') setTimeout(() => { if (slot.firstChild) slot.innerHTML = ''; }, 3000);
+  }
+  function clearAlert() { el('#alert-slot').innerHTML = ''; }
+  function toast(msg, kind = '') {
+    const t = document.createElement('div');
+    t.className = 'toast ' + kind;
+    t.textContent = msg;
+    el('#toast-slot').appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+
+  // ─── Actions ─────────────────────────────────────────────────
+  async function onSearch(ev) {
+    ev.preventDefault();
+    const input = el('#q-add');
+    const term = input.value.trim();
+    if (!term || state.loading) return;
+
+    clearAlert();
+    state.pending = null;
+    renderDraft();
+
+    setLoading(true);
+    try {
+      const result = await lookupTerm(term);
+      state.pending = result;
+      renderDraft();
+      input.value = '';
+    } catch (err) {
+      console.error(err);
+      state.pending = { hanzi: term, pinyin: '', indonesia: '', kategori: 'Umum', contoh: '' };
+      renderDraft();
+      if (err.message === 'MISSING_KEY') {
+        showAlert('API key belum diisi. Buka ⚙️ Pengaturan dulu, atau isi manual di draf bawah.');
+      } else if (err.message === 'BAD_JSON') {
+        showAlert('AI kasih respon yang tidak bisa dibaca. Isi manual di draf bawah.');
+      } else {
+        showAlert('AI gagal diakses. Isi manual di draf bawah. (' + err.message.slice(0, 80) + ')');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function setLoading(v) {
+    state.loading = v;
+    const btn = el('#btn-add');
+    btn.disabled = v;
+    el('.spinner', btn).hidden = !v;
+    el('#q-add').disabled = v;
+  }
+
+  function acceptDraft() {
+    if (!state.pending) return;
+    const d = {
+      ...state.pending,
+      hanzi: state.pending.hanzi.trim(),
+      pinyin: state.pending.pinyin.trim(),
+      indonesia: state.pending.indonesia.trim(),
+      kategori: normalizeCategory(state.pending.kategori),
+      contoh: state.pending.contoh.trim(),
+    };
+    if (!d.hanzi || !d.indonesia) return;
+
+    const dup = state.entries.find(e => e.hanzi === d.hanzi && e.indonesia === d.indonesia);
+    if (dup) {
+      toast('Kata ini sudah ada di kamus', 'error');
+      state.pending = null;
+      renderDraft();
+      return;
+    }
+    state.entries = [newEntry(d), ...state.entries];
+    saveEntries();
+    state.pending = null;
+    clearAlert();
+    render();
+    toast('✅ "' + d.hanzi + '" tersimpan', 'success');
+  }
+
+  function cancelDraft() {
+    state.pending = null;
+    clearAlert();
+    renderDraft();
+  }
+
+  function startEdit(id) {
+    state.editingId = id;
+    state.editingDraft = { ...state.entries.find(e => e.id === id) };
+    renderList();
+  }
+  function saveEdit() {
+    if (!state.editingDraft) return;
+    const d = state.editingDraft;
+    if (!d.hanzi.trim() || !d.indonesia.trim()) {
+      toast('Hanzi & arti wajib diisi', 'error');
+      return;
+    }
+    state.entries = state.entries.map(e => e.id === state.editingId ? {
+      ...e,
+      hanzi: d.hanzi.trim(),
+      pinyin: d.pinyin.trim(),
+      indonesia: d.indonesia.trim(),
+      kategori: normalizeCategory(d.kategori),
+      contoh: d.contoh.trim(),
+    } : e);
+    saveEntries();
+    state.editingId = null;
+    state.editingDraft = null;
+    render();
+    toast('💾 Perubahan tersimpan', 'success');
+  }
+  function cancelEdit() {
+    state.editingId = null;
+    state.editingDraft = null;
+    renderList();
+  }
+
+  function deleteEntry(id) {
+    const entry = state.entries.find(e => e.id === id);
+    if (!entry) return;
+    if (!confirm(`Hapus "${entry.hanzi}" (${entry.indonesia}) dari kamus?`)) return;
+    state.entries = state.entries.filter(e => e.id !== id);
+    saveEntries();
+    render();
+    toast('🗑 Terhapus', '');
+  }
+
+  // ─── Export / Import ─────────────────────────────────────────
+  function exportJSON() {
+    if (!state.entries.length) { toast('Belum ada kata untuk di-backup', 'error'); return; }
+    const payload = {
+      app: 'kamus-konstruksi',
+      version: 1,
+      savedAt: new Date().toISOString(),
+      entries: state.entries,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kamus-konstruksi-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('⬇ Backup JSON diunduh', 'success');
+  }
+
+  function exportCSV() {
+    if (!state.entries.length) { toast('Belum ada kata untuk di-export', 'error'); return; }
+    const rows = [['Hanzi', 'Pinyin', 'Indonesia', 'Kategori', 'Contoh']];
+    state.entries.forEach(e => {
+      rows.push([e.hanzi, e.pinyin, e.indonesia, e.kategori, e.contoh || '']);
+    });
+    const csv = rows.map(r => r.map(c => {
+      const s = String(c ?? '').replace(/"/g, '""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    }).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kamus-konstruksi-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('⬇ CSV diunduh', 'success');
+  }
+
+  function parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (!lines.length) return [];
+    const parseRow = (line) => {
+      const out = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (inQ) {
+          if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+          else if (ch === '"') { inQ = false; }
+          else cur += ch;
+        } else {
+          if (ch === ',') { out.push(cur); cur = ''; }
+          else if (ch === '"') inQ = true;
+          else cur += ch;
+        }
+      }
+      out.push(cur);
+      return out;
+    };
+    const header = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+    const idx = {
+      hanzi: header.findIndex(h => h.includes('hanzi') || h.includes('漢字') || h.includes('汉字')),
+      pinyin: header.findIndex(h => h.includes('pinyin') || h.includes('拼音')),
+      indonesia: header.findIndex(h => h.includes('indonesia') || h.includes('arti') || h === 'indo'),
+      kategori: header.findIndex(h => h.includes('kategori') || h.includes('categor')),
+      contoh: header.findIndex(h => h.includes('contoh') || h.includes('catatan') || h.includes('note')),
+    };
+    if (idx.hanzi === -1) return [];
+    return lines.slice(1).map(l => {
+      const cells = parseRow(l);
+      return {
+        hanzi: (cells[idx.hanzi] || '').trim(),
+        pinyin: (cells[idx.pinyin] || '').trim(),
+        indonesia: (cells[idx.indonesia] || '').trim(),
+        kategori: normalizeCategory(cells[idx.kategori]),
+        contoh: (cells[idx.contoh] || '').trim(),
+      };
+    }).filter(r => r.hanzi);
+  }
+
+  async function onImportFile(ev) {
+    const file = ev.target.files?.[0];
+    ev.target.value = '';
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const name = file.name.toLowerCase();
+      let incoming = [];
+      if (name.endsWith('.json')) {
+        const parsed = JSON.parse(text);
+        const arr = Array.isArray(parsed) ? parsed : (parsed?.entries || []);
+        incoming = arr.map(e => ({
+          hanzi: String(e.hanzi || '').trim(),
+          pinyin: String(e.pinyin || '').trim(),
+          indonesia: String(e.indonesia || '').trim(),
+          kategori: normalizeCategory(e.kategori),
+          contoh: String(e.contoh || '').trim(),
+        })).filter(e => e.hanzi);
+      } else {
+        incoming = parseCSV(text);
+      }
+      if (!incoming.length) { toast('File tidak berisi data yang bisa dibaca', 'error'); return; }
+      mergeImported(incoming);
+    } catch (e) {
+      console.error(e);
+      toast('Gagal baca file: ' + (e.message || 'format tak dikenal').slice(0, 60), 'error');
+    }
+  }
+
+  function mergeImported(incoming) {
+    const seen = new Set(state.entries.map(e => e.hanzi + '|' + e.indonesia));
+    const added = [];
+    for (const e of incoming) {
+      const key = e.hanzi + '|' + e.indonesia;
+      if (!seen.has(key)) { seen.add(key); added.push(newEntry(e)); }
+    }
+    if (!added.length) { toast('Semua kata di file sudah ada', ''); return; }
+    state.entries = [...added, ...state.entries];
+    saveEntries();
+    render();
+    toast(`⬆ ${added.length} kata dimuat`, 'success');
+  }
+
+  async function copyClipboard() {
+    if (!state.entries.length) { toast('Belum ada data untuk disalin', 'error'); return; }
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(state.entries));
+      toast('📋 Disalin ke clipboard', 'success');
+    } catch (e) {
+      toast('Gagal menyalin — izin clipboard ditolak', 'error');
+    }
+  }
+
+  function pasteClipboard() {
+    const txt = prompt('Paste (Tempel) data JSON yang pernah kamu salin:');
+    if (!txt) return;
+    try {
+      const parsed = JSON.parse(txt);
+      const arr = Array.isArray(parsed) ? parsed : (parsed?.entries || []);
+      const incoming = arr.map(e => ({
+        hanzi: String(e.hanzi || '').trim(),
+        pinyin: String(e.pinyin || '').trim(),
+        indonesia: String(e.indonesia || '').trim(),
+        kategori: normalizeCategory(e.kategori),
+        contoh: String(e.contoh || '').trim(),
+      })).filter(e => e.hanzi);
+      if (!incoming.length) { toast('Format salah atau data kosong', 'error'); return; }
+      mergeImported(incoming);
+    } catch (e) {
+      toast('Gagal baca — pastikan JSON valid', 'error');
+    }
+  }
+
+  function clearAll() {
+    if (!state.entries.length) { toast('Sudah kosong', ''); return; }
+    if (!confirm(`Yakin hapus SEMUA ${state.entries.length} kata dari kamus? Aksi ini tidak bisa di-undo.`)) return;
+    state.entries = [];
+    saveEntries();
+    render();
+    toast('🗑 Semua kata dihapus', '');
+  }
+
+  // ─── Drawer ──────────────────────────────────────────────────
+  function openDrawer() {
+    el('#drawer').classList.add('open');
+    el('#drawer').setAttribute('aria-hidden', 'false');
+    const scrim = el('#drawer-scrim');
+    scrim.hidden = false;
+    requestAnimationFrame(() => scrim.classList.add('show'));
+    el('#s-endpoint').value = state.settings.endpoint || '';
+    el('#s-key').value = state.settings.apiKey || '';
+  }
+  function closeDrawer() {
+    const drawer = el('#drawer');
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    const scrim = el('#drawer-scrim');
+    scrim.classList.remove('show');
+    setTimeout(() => { scrim.hidden = true; }, 220);
+    state.settings.endpoint = el('#s-endpoint').value.trim();
+    state.settings.apiKey = el('#s-key').value.trim();
+    saveSettings();
+    updateEmptyState();
+  }
+
+  // ─── Init ────────────────────────────────────────────────────
+  function init() {
+    loadEntries();
+    loadSettings();
+    render();
+
+    el('#search-form').addEventListener('submit', onSearch);
+    el('#q-filter').addEventListener('input', ev => {
+      state.query = ev.target.value;
+      renderList();
+      updateEmptyState();
+    });
+    el('#cat-pills').addEventListener('click', ev => {
+      const b = ev.target.closest('.cat-pill');
+      if (!b) return;
+      state.cat = b.dataset.cat;
+      renderPills();
+      renderList();
+      updateEmptyState();
+    });
+
+    // Global delegated actions
+    document.addEventListener('click', ev => {
+      const btn = ev.target.closest('[data-act]');
+      if (!btn) return;
+      const act = btn.dataset.act;
+      if (act === 'draft-save') acceptDraft();
+      else if (act === 'draft-cancel') cancelDraft();
+      else if (act === 'edit-save') saveEdit();
+      else if (act === 'edit-cancel') cancelEdit();
+      else if (act === 'edit') {
+        const id = btn.closest('.card')?.dataset.id;
+        if (id) startEdit(id);
+      } else if (act === 'delete') {
+        const id = btn.closest('.card')?.dataset.id;
+        if (id) deleteEntry(id);
+      }
+    });
+
+    el('#btn-open-settings').addEventListener('click', openDrawer);
+    el('#btn-close-settings').addEventListener('click', closeDrawer);
+    el('#drawer-scrim').addEventListener('click', closeDrawer);
+
+    el('#btn-export-json').addEventListener('click', exportJSON);
+    el('#btn-export-csv').addEventListener('click', exportCSV);
+    el('#btn-import').addEventListener('click', () => el('#file-import').click());
+    el('#file-import').addEventListener('change', onImportFile);
+    el('#btn-copy-clip').addEventListener('click', copyClipboard);
+    el('#btn-paste-clip').addEventListener('click', pasteClipboard);
+    el('#btn-clear-all').addEventListener('click', clearAll);
+
+    document.addEventListener('keydown', ev => {
+      if (ev.key === 'Escape') {
+        if (el('#drawer').classList.contains('open')) closeDrawer();
+        else if (state.pending) cancelDraft();
+        else if (state.editingId) cancelEdit();
+      }
+    });
+
+    // Cross-tab sync (useful if user opens on 2 tabs)
+    window.addEventListener('storage', ev => {
+      if (ev.key === STORAGE_KEY) {
+        try {
+          state.entries = JSON.parse(ev.newValue || '[]');
+          render();
+        } catch (e) {}
+      }
+    });
+
+    // Autofocus on desktop, skip on mobile (avoids keyboard flash)
+    if (!('ontouchstart' in window)) {
+      el('#q-add').focus();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -832,16 +832,23 @@
           </p>
         </div>
       </div>
-      <button class="icon-btn" id="btn-open-settings" aria-label="Pengaturan" title="Pengaturan">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
+      <div style="display:flex; gap:8px;">
+        <button class="icon-btn" id="btn-open-tocfl" aria-label="TOCFL Dictionary" title="TOCFL Dictionary" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="btn-open-settings" aria-label="Pengaturan" title="Pengaturan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="view-main">
     <form class="search" id="search-form">
       <input
         id="q-add"
@@ -884,6 +891,43 @@
       <h3 id="empty-title">Kamus masih kosong</h3>
       <p id="empty-desc">Ketik istilah di atas untuk mulai. AI akan bantu isi pinyin & arti.</p>
       <span class="hint" id="empty-hint" hidden>💡 Set API key di ⚙️ Pengaturan dulu supaya AI auto-fill jalan</span>
+    </div>
+  </main>
+
+  <main class="container" id="view-tocfl" hidden>
+    <div class="search" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background: var(--bg-1); border: 1px solid var(--border); padding: 12px 16px; border-radius: var(--radius-lg);">
+      <h2 style="font-size: 18px; margin: 0; color: var(--accent);">TOCFL Dictionary</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" id="btn-tocfl-back" style="padding: 10px 14px; font-size: 13px;">Kembali</button>
+        <button class="btn-primary" id="btn-sync-tocfl" style="padding: 10px 14px; font-size: 13px;">
+          <span class="spinner" hidden></span>
+          <span class="btn-label">🔄 Sync TOCFL</span>
+        </button>
+      </div>
+    </div>
+    
+    <section class="filter-section" aria-label="Filter TOCFL">
+      <input
+        id="q-tocfl-filter"
+        type="search"
+        class="filter-input"
+        placeholder="Cari Hanzi atau Pinyin..."
+        autocomplete="off"
+      />
+      <div class="cat-pills" id="tocfl-level-pills" role="tablist"></div>
+    </section>
+
+    <div class="list-meta">
+      <span id="tocfl-list-count">0 dari 0 kata</span>
+      <span id="tocfl-last-sync" style="font-size: 11px; opacity: 0.7;">Belum pernah sync</span>
+    </div>
+
+    <div id="tocfl-list" class="grid" aria-live="polite"></div>
+    
+    <div id="tocfl-empty-state" class="empty" hidden>
+      <div class="empty-icon">📭</div>
+      <h3 id="tocfl-empty-title">Tidak ada data TOCFL</h3>
+      <p id="tocfl-empty-desc">Klik "Sync TOCFL" untuk mengunduh daftar kata resmi dari server.</p>
     </div>
   </main>
 
@@ -1058,6 +1102,14 @@
     lastSyncedAt: 0,
     syncError: null,
     loading: false,
+  };
+
+  const tocflState = {
+    entries: [],
+    query: '',
+    level: 'B1',
+    loading: false,
+    lastSync: 0
   };
 
   // ─── Storage ─────────────────────────────────────────────────
@@ -1333,6 +1385,19 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     const badge = el('#sync-badge');
     const dot = el('#sync-dot');
     const label = el('#sync-label');
+    
+    // Pastikan tombol TOCFL merespon state.mode
+    const btnTocfl = el('#btn-open-tocfl');
+    if (btnTocfl) {
+      if (state.mode === 'admin') {
+        btnTocfl.hidden = false;
+        btnTocfl.style.display = 'inline-flex';
+      } else {
+        btnTocfl.hidden = true;
+        btnTocfl.style.display = 'none';
+      }
+    }
+
     badge.className = 'sync-badge mode-' + state.mode + (state.syncing ? ' syncing' : '');
     if (state.syncing) { label.textContent = 'sync…'; return; }
     switch (state.mode) {
@@ -2088,6 +2153,150 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     }
   }
 
+  // ─── TOCFL Logic ─────────────────────────────────────────────
+  async function fetchTocfl() {
+    if (!isShared() || state.mode !== 'admin') return;
+    try {
+      const data = await apiCall('/tocfl', { method: 'GET' });
+      tocflState.entries = data.entries || [];
+      renderTocfl();
+    } catch (e) {
+      toast('Gagal memuat TOCFL', 'error');
+    }
+  }
+
+  async function syncTocflData() {
+    if (!isShared() || state.mode !== 'admin') return;
+    if (!confirm('Sync data TOCFL resmi akan memakan waktu beberapa detik. Lanjutkan?')) return;
+    
+    const btn = el('#btn-sync-tocfl');
+    const spin = el('.spinner', btn);
+    const lbl = el('.btn-label', btn);
+    btn.disabled = true;
+    spin.hidden = false;
+    lbl.textContent = 'Syncing...';
+    
+    try {
+      const data = await apiCall('/tocfl/sync', { method: 'POST' });
+      toast(`✅ Sync selesai. ${data.added} baru, ${data.updated} diupdate.`, 'success');
+      tocflState.lastSync = data.lastSync || Date.now();
+      await fetchTocfl();
+    } catch (e) {
+      toast('Sync gagal: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      spin.hidden = true;
+      lbl.textContent = '🔄 Sync TOCFL';
+    }
+  }
+
+  function renderTocflPills() {
+    const container = el('#tocfl-level-pills');
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    container.innerHTML = levels.map(l => {
+      const active = l === tocflState.level;
+      return `<button
+        class="cat-pill ${active ? 'active' : ''}"
+        data-tocfl-level="${l}"
+        role="tab"
+        style="--pill-color: var(--accent);"
+        aria-selected="${active}"
+      >${l}</button>`;
+    }).join('');
+  }
+
+  function getTocflFiltered() {
+    const q = tocflState.query.toLowerCase();
+    const lvl = tocflState.level;
+    return tocflState.entries.filter(e => {
+      if (e.level !== lvl) return false;
+      if (!q) return true;
+      return (
+        e.hanzi.toLowerCase().includes(q) ||
+        e.pinyin.toLowerCase().includes(q) ||
+        (e.indonesia || '').toLowerCase().includes(q)
+      );
+    });
+  }
+
+  function renderTocfl() {
+    renderTocflPills();
+    const filtered = getTocflFiltered();
+    
+    el('#tocfl-list-count').textContent = `${filtered.length} dari ${tocflState.entries.length} kata TOCFL`;
+    el('#tocfl-last-sync').textContent = tocflState.lastSync 
+      ? 'Sync terakhir: ' + new Date(tocflState.lastSync).toLocaleString('id-ID')
+      : (tocflState.entries.length > 0 ? 'Data lokal termuat' : 'Belum pernah sync');
+
+    const list = el('#tocfl-list');
+    const empty = el('#tocfl-empty-state');
+    
+    if (tocflState.entries.length === 0) {
+      list.innerHTML = '';
+      empty.hidden = false;
+      el('#tocfl-empty-title').textContent = 'Tidak ada data TOCFL';
+      el('#tocfl-empty-desc').textContent = 'Klik "Sync TOCFL" untuk mengunduh daftar kata resmi dari server.';
+      return;
+    }
+    
+    if (filtered.length === 0) {
+      list.innerHTML = '';
+      empty.hidden = false;
+      el('#tocfl-empty-title').textContent = 'Tidak ditemukan';
+      el('#tocfl-empty-desc').textContent = 'Coba ganti kata kunci pencarian.';
+      return;
+    }
+    
+    empty.hidden = true;
+    
+    // Virtualization / limits for performance (prevent DOM crash)
+    const MAX_RENDER = 200;
+    const toRender = filtered.slice(0, MAX_RENDER);
+    
+    const tpl = el('#tpl-card');
+    list.innerHTML = '';
+    toRender.forEach(entry => {
+      const node = tpl.content.cloneNode(true);
+      const card = node.querySelector('.card');
+      card.style.setProperty('--card-accent', 'var(--accent)');
+      card.style.setProperty('--card-tag-bg', 'rgba(255,138,61,0.15)');
+      
+      node.querySelector('.card-tag').textContent = entry.level;
+      node.querySelector('.card-hanzi').textContent = entry.hanzi;
+      node.querySelector('.card-pinyin').textContent = entry.pinyin || '—';
+      node.querySelector('.card-indo').textContent = entry.indonesia || '(tidak ada terjemahan)';
+      node.querySelector('.card-note').hidden = true;
+      
+      // Hide actions
+      const actions = node.querySelector('.card-actions');
+      if (actions) actions.remove();
+      
+      list.appendChild(node);
+    });
+    
+    if (filtered.length > MAX_RENDER) {
+      const more = document.createElement('div');
+      more.style.textAlign = 'center';
+      more.style.padding = '12px';
+      more.style.gridColumn = '1 / -1';
+      more.style.color = 'var(--text-3)';
+      more.textContent = `... dan ${filtered.length - MAX_RENDER} lainnya (Gunakan pencarian untuk lebih spesifik)`;
+      list.appendChild(more);
+    }
+  }
+
+  function openTocfl() {
+    if (state.mode !== 'admin') return;
+    el('#view-main').hidden = true;
+    el('#view-tocfl').hidden = false;
+    if (tocflState.entries.length === 0) fetchTocfl();
+    renderTocfl();
+  }
+  function closeTocfl() {
+    el('#view-main').hidden = false;
+    el('#view-tocfl').hidden = true;
+  }
+
   // ─── Init ────────────────────────────────────────────────────
   function init() {
     loadEntries();
@@ -2155,6 +2364,22 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     el('#btn-copy-clip').addEventListener('click', copyClipboard);
     el('#btn-paste-clip').addEventListener('click', pasteClipboard);
     el('#btn-clear-all').addEventListener('click', clearAll);
+
+    // TOCFL listeners
+    el('#btn-open-tocfl').addEventListener('click', openTocfl);
+    el('#btn-tocfl-back').addEventListener('click', closeTocfl);
+    el('#btn-sync-tocfl').addEventListener('click', syncTocflData);
+    
+    el('#q-tocfl-filter').addEventListener('input', ev => {
+      tocflState.query = ev.target.value;
+      renderTocfl();
+    });
+    el('#tocfl-level-pills').addEventListener('click', ev => {
+      const b = ev.target.closest('.cat-pill');
+      if (!b) return;
+      tocflState.level = b.dataset.tocflLevel;
+      renderTocfl();
+    });
 
     document.addEventListener('keydown', ev => {
       if (ev.key === 'Escape') {

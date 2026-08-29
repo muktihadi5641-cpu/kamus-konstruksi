@@ -72,11 +72,14 @@ export default {
       if (idMatch && method === 'PATCH') return await handleEdit(request, env, cors, mode, idMatch[1]);
       if (idMatch && method === 'DELETE') return await handleDelete(env, cors, mode, idMatch[1]);
 
+      if (path === '/tocfl' && method === 'GET') return await handleTocflList(env, cors, mode);
+      if (path === '/tocfl/sync' && method === 'POST') return await handleTocflSync(request, env, cors, mode);
+
       if (path === '/' && method === 'GET') {
         return json({
           app: 'kamus-konstruksi-worker',
           version: 2,
-          endpoints: ['/ai', '/entries', '/entries/:id', '/entries/bulk'],
+          endpoints: ['/ai', '/entries', '/entries/:id', '/entries/bulk', '/tocfl', '/tocfl/sync'],
         }, 200, cors);
       }
       return json({ error: 'not_found', path }, 404, cors);
@@ -227,6 +230,103 @@ async function handleBulk(request, env, cors, mode) {
   const next = [...added, ...entries].slice(0, MAX_ENTRIES);
   await writeEntries(env, next);
   return json({ added: added.length, count: next.length }, 200, cors);
+}
+
+// ─── TOCFL ───────────────────────────────────────────────────
+const TOCFL_KV_KEY = 'tocfl:v1';
+const TOCFL_SOURCE = 'https://raw.githubusercontent.com/PSeitz/tocfl/master/tocfl_words.json';
+
+const LEVEL_MAP = {
+  1: 'A1', 2: 'A2', 3: 'B1', 4: 'B2', 5: 'C1', 6: 'C2'
+};
+
+async function readTocfl(env) {
+  if (!env.KAMUS) throw new Error('KV_NOT_BOUND');
+  const raw = await env.KAMUS.get(TOCFL_KV_KEY);
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
+async function handleTocflList(env, cors, mode) {
+  if (mode !== 'admin') return json({ error: 'admin_only' }, 403, cors);
+  const entries = await readTocfl(env);
+  return json({ entries, count: entries.length }, 200, cors);
+}
+
+async function handleTocflSync(request, env, cors, mode) {
+  if (mode !== 'admin') return json({ error: 'admin_only' }, 403, cors);
+  
+  try {
+    const res = await fetch(TOCFL_SOURCE);
+    if (!res.ok) throw new Error(`HTTP ${res.status} from source`);
+    const text = await res.text();
+    
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    const incomingMap = new Map();
+    
+    for (const line of lines) {
+      try {
+        const item = JSON.parse(line);
+        if (!item.text) continue;
+        
+        const lvl = LEVEL_MAP[item.tocfl_level] || 'B1';
+        const key = String(item.text).trim();
+        
+        incomingMap.set(key, {
+          id: 't-' + makeId(),
+          hanzi: key,
+          pinyin: String(item.pinyin || '').trim(),
+          indonesia: '', // Source does not have Indonesian
+          level: lvl,
+          source: 'SC-TOP (PSeitz repo)',
+          updatedAt: Date.now()
+        });
+      } catch (e) {
+        // Skip malformed lines
+      }
+    }
+    
+    const existing = await readTocfl(env);
+    const existingMap = new Map(existing.map(e => [e.hanzi, e]));
+    
+    let added = 0;
+    let updated = 0;
+    const finalEntries = [];
+    
+    for (const [hanzi, inItem] of incomingMap.entries()) {
+      const ex = existingMap.get(hanzi);
+      if (ex) {
+        let changed = false;
+        if (ex.pinyin !== inItem.pinyin || ex.level !== inItem.level) changed = true;
+        
+        finalEntries.push({
+          ...ex,
+          pinyin: inItem.pinyin || ex.pinyin,
+          level: inItem.level,
+          updatedAt: changed ? Date.now() : ex.updatedAt
+        });
+        if (changed) updated++;
+      } else {
+        finalEntries.push(inItem);
+        added++;
+      }
+    }
+    
+    // Also keep existing ones that weren't in the incoming source just in case?
+    // Wait, it's better to keep the list purely based on official source, but maybe preserve custom additions?
+    // The requirement says "hindari duplicate" and "Update data yang berubah". 
+    // We will keep existing that are NOT in the incoming list too.
+    for (const ex of existing) {
+      if (!incomingMap.has(ex.hanzi)) {
+        finalEntries.push(ex);
+      }
+    }
+
+    await env.KAMUS.put(TOCFL_KV_KEY, JSON.stringify(finalEntries));
+    return json({ added, updated, total: finalEntries.length, lastSync: Date.now() }, 200, cors);
+  } catch (err) {
+    return json({ error: 'sync_failed', detail: String(err) }, 500, cors);
+  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────

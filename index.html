@@ -2410,7 +2410,8 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
 
   async function syncTocflData() {
     if (!isShared() || state.mode !== 'admin') return;
-    if (!confirm('Sync 7,500+ kata TOCFL resmi dari GitHub (ivankra/tocfl). Mungkin butuh 10-15 detik. Lanjutkan?')) return;
+    // No confirm dialog needed - admin only, show info toast instead
+    toast('🔄 Mengunduh 7500+ kata TOCFL dari GitHub...', 'info');
 
     const btn = el('#btn-sync-tocfl');
     const spin = el('.spinner', btn);
@@ -2445,7 +2446,7 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
         : null;
       if (!entries) throw new Error('Format JSON tidak valid (perlu array atau {entries:[]})');
 
-      if (!confirm(`Upload ${entries.length} kata TOCFL ke server? Kata yang sudah ada akan di-merge (terjemahan Indonesia dipertahankan).`)) return;
+      toast(`⬆ Mengupload ${entries.length} kata TOCFL...`, 'info');
 
       const btn = el('#btn-tocfl-import');
       btn.disabled = true;
@@ -2545,7 +2546,7 @@ Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
 
     const untranslated = tocflState.entries.filter(e => !e.indonesia);
     if (!untranslated.length) { toast('Semua kata di halaman ini sudah diterjemahkan!', 'success'); return; }
-    if (!confirm(`AI akan menterjemahkan ${untranslated.length} kata yang belum ada terjemahannya di halaman ini. Lanjutkan?`)) return;
+    toast(`✨ AI menerjemahkan ${untranslated.length} kata...`, 'info');
 
     tocflState.aiTranslating = true;
     const btn = el('#btn-ai-translate-batch');

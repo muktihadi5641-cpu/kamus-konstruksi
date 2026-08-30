@@ -2921,7 +2921,7 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
   } else {
     init();
   }
-})();
+
   // ─── TOCFL Story Generator ─────────────────────────────────────
   async function generateTocflStory() {
     let level = tocflState.level;
@@ -2977,18 +2977,18 @@ PENTING: Jangan gunakan tanda kutip ganda (") di dalam isi teks, gunakan tanda k
       const parsed = JSON.parse(text);
       
       if (Array.isArray(parsed) && parsed.length > 0) {
-        content.innerHTML = parsed.map(p => \`
+        content.innerHTML = parsed.map(p => `
           <div class="story-para">
-            <div class="story-para-hanzi">\${escapeHtml(p.hanzi)}</div>
-            <div class="story-para-pinyin">\${escapeHtml(p.pinyin)}</div>
-            <div class="story-para-indo">\${escapeHtml(p.indo)}</div>
+            <div class="story-para-hanzi">${escapeHtml(p.hanzi)}</div>
+            <div class="story-para-pinyin">${escapeHtml(p.pinyin)}</div>
+            <div class="story-para-indo">${escapeHtml(p.indo)}</div>
           </div>
-        \`).join('');
+        `).join('');
       } else {
         content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--info);">Gagal menghasilkan cerita. Coba lagi.</div>';
       }
     } catch (e) {
-      content.innerHTML = \`<div style="text-align:center;padding:20px;color:var(--error);">Error: \${escapeHtml(e.message)}</div>\`;
+      content.innerHTML = `<div style="text-align:center;padding:20px;color:var(--error);">Error: ${escapeHtml(e.message)}</div>`;
     }
   }
 
@@ -3005,6 +3005,7 @@ PENTING: Jangan gunakan tanda kutip ganda (") di dalam isi teks, gunakan tanda k
   el('#btn-close-story').addEventListener('click', closeStoryModal);
   el('#story-scrim').addEventListener('click', closeStoryModal);
 
+})();
 </script>
 
 </body>

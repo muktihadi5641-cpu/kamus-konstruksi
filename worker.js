@@ -39,7 +39,7 @@ const ALLOWED_MODELS = new Set([
 ]);
 const MAX_TOKENS_CAP = 2000;
 const KV_KEY = 'entries:v1';
-const MAX_ENTRIES = 5000;
+const MAX_ENTRIES = 20000;
 const MAX_FIELD_LEN = 500;
 
 // TOCFL source: official CSV from ivankra/tocfl (mirrors tocfl.edu.tw data)
@@ -49,7 +49,8 @@ const MAX_TOCFL = 10000;
 
 const TOCFL_LEVEL_MAP = {
   'L0': 'A1', 'L1': 'A2', 'L2': 'B1',
-  'L3': 'B2', 'L4': 'C1', 'L5': 'C2'
+  'L3': 'B2', 'L4': 'C1', 'L5': 'C2',
+  'L6': 'B1課', 'L7': 'B2課'
 };
 
 export default {
@@ -163,7 +164,7 @@ async function handleList(env, cors, mode) {
   return json({ entries, mode, count: entries.length }, 200, cors);
 }
 
-const CATS = new Set(['Alat', 'Alat Berat', 'Material', 'Struktur', 'Keselamatan', 'Proses', 'Ukuran', 'Umum']);
+const CATS = new Set(['Alat', 'Alat Berat', 'Material', 'Struktur', 'Keselamatan', 'Proses', 'Ukuran', 'Umum', 'B1課', 'B2課']);
 function sanitizeEntry(raw, author) {
   const s = (v) => String(v || '').trim().slice(0, MAX_FIELD_LEN);
   const kat = s(raw.kategori);

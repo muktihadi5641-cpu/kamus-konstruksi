@@ -1312,7 +1312,7 @@
   // ─── Constants ───────────────────────────────────────────────
   const STORAGE_KEY = 'kamus-konstruksi-v2';
   const SETTINGS_KEY = 'kamus-konstruksi-settings-v2';
-  const CATS = ['Alat', 'Alat Berat', 'Material', 'Struktur', 'Keselamatan', 'Proses', 'Ukuran', 'Umum', 'B1課', 'B2課'];
+  const CATS = ['Alat', 'Alat Berat', 'Material', 'Struktur', 'Keselamatan', 'Proses', 'Ukuran', 'Umum'];
   const CAT_VAR = {
     'Alat': '--cat-alat',
     'Alat Berat': '--cat-alatberat',
@@ -2615,7 +2615,7 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
   function renderTocflStats() {
     const container = el('#tocfl-stats-bar');
     if (!container) return;
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B1課', 'B2課'];
     container.innerHTML = levels.map(l => {
       const s = tocflState.stats[l] || { total: 0, translated: 0 };
       const pct = s.total > 0 ? Math.round(s.translated / s.total * 100) : 0;
@@ -2630,7 +2630,7 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
 
   function renderTocflPills() {
     const container = el('#tocfl-level-pills');
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B1課', 'B2課'];
     container.innerHTML = levels.map(l => {
       const active = l === tocflState.level;
       const color = LEVEL_COLORS[l] || 'var(--accent)';

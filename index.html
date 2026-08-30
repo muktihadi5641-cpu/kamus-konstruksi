@@ -1013,6 +1013,12 @@
     .search input { padding: 12px 14px; font-size: 15px; }
     .card-hanzi { font-size: 30px; }
   }
+  /* ─── Story Modal ─── */
+  .story-para { margin-bottom: 20px; padding: 16px; background: var(--bg-1); border-radius: 8px; border-left: 4px solid var(--accent); }
+  .story-para-hanzi { font-size: 20px; color: var(--text-1); font-weight: 500; margin-bottom: 8px; font-family: 'Noto Sans TC', sans-serif; line-height: 1.6; }
+  .story-para-pinyin { font-size: 14px; color: var(--text-2); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; line-height: 1.4; }
+  .story-para-indo { font-size: 15px; color: var(--text-3); font-style: italic; line-height: 1.5; }
+  .modal-story { max-width: 600px !important; width: 95% !important; max-height: 85vh; display: flex; flex-direction: column; }
 </style>
 </head>
 <body>
@@ -1135,7 +1141,8 @@
     <div class="list-meta">
       <span id="tocfl-list-count">0 kata</span>
       <span id="tocfl-last-sync" style="font-size:11px;opacity:0.7;">Belum pernah sync</span>
-      <button class="btn-mini" id="btn-ai-translate-batch" style="margin-left:auto;font-size:11px;" title="AI terjemahkan kata yang belum ada terjemahannya di halaman ini">✨ AI Terjemahkan Halaman</button>
+      <button class="btn-mini" id="btn-ai-translate-batch" style="margin-left:auto;font-size:11px;" title="AI terjemahkan kata yang belum ada terjemahannya di halaman ini">✨ AI Terjemahkan</button>
+      <button class="btn-mini" id="btn-generate-story" style="font-size:11px; background:var(--accent); color:#000;" title="Buat cerita pendek menggunakan kosakata level ini">📖 Baca Cerita</button>
     </div>
 
     <div id="tocfl-list" aria-live="polite" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;"></div>
@@ -1147,6 +1154,23 @@
       <div class="empty-icon">📭</div>
       <h3 id="tocfl-empty-title">Tidak ada data TOCFL</h3>
       <p id="tocfl-empty-desc">Klik "Sync dari GitHub" untuk mengunduh 7,500+ kata resmi TOCFL A1–C2.</p>
+    </div>
+
+    <!-- Story Modal -->
+    <div id="story-scrim" class="scrim" hidden></div>
+    <div id="story-modal" class="modal modal-story" role="dialog" aria-modal="true" hidden>
+      <div class="modal-head">
+        <h2>📖 Latihan Membaca (<span id="story-level-label"></span>)</h2>
+        <button class="icon-btn" id="btn-close-story" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="story-content" style="overflow-y:auto; flex:1; padding:20px;">
+        <!-- Generated paragraphs go here -->
+      </div>
+      <div style="padding:16px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; background:var(--bg-0); border-radius:0 0 var(--radius-lg) var(--radius-lg);">
+        <button id="btn-regen-story" class="btn-ghost" style="padding:8px 16px;font-size:13px;">🔄 Buat Cerita Baru</button>
+      </div>
     </div>
   </main>
 
@@ -2898,6 +2922,89 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
     init();
   }
 })();
+  // ─── TOCFL Story Generator ─────────────────────────────────────
+  async function generateTocflStory() {
+    let level = tocflState.level;
+    if (level === 'Semua' || !level) level = 'A1';
+
+    const words = tocflState.entries
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 15)
+      .map(e => `${e.hanzi} (${e.indonesia || e.pinyin})`)
+      .join(', ');
+
+    if (!words) {
+      toast('Belum ada kosakata di halaman ini untuk dibuat cerita', 'error');
+      return;
+    }
+
+    const modal = el('#story-modal');
+    const scrim = el('#story-scrim');
+    const content = el('#story-content');
+    
+    el('#story-level-label').textContent = level;
+    content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-3);"><div class="spinner" style="display:inline-block;margin-bottom:10px;"></div><br/>AI sedang menyusun cerita dari kosakata ' + level + '...</div>';
+    
+    scrim.hidden = false;
+    modal.hidden = false;
+    scrim.classList.add('show');
+    modal.classList.add('open');
+
+    const prompt = `Kamu adalah guru bahasa Mandarin. Buatlah cerita pendek (3 paragraf) dalam bahasa Mandarin tentang kehidupan sehari-hari atau pekerjaan konstruksi.
+Cerita WAJIB disesuaikan untuk pelajar tingkat TOCFL ${level}. Gunakan sebanyak mungkin kata-kata berikut dalam cerita: ${words}.
+
+Kembalikan HANYA array JSON (tanpa markdown). Setiap elemen array mewakili 1 paragraf, dengan format:
+[
+  {
+    "hanzi": "paragraf dalam Hanzi",
+    "pinyin": "pinyin untuk paragraf tersebut",
+    "indo": "terjemahan bahasa Indonesia untuk paragraf tersebut"
+  }
+]
+PENTING: Jangan gunakan tanda kutip ganda (") di dalam isi teks, gunakan tanda kutip tunggal agar JSON valid.`;
+
+    try {
+      const data = await apiCall('/ai', {
+        method: 'POST',
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2000, responseMimeType: 'application/json' },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+      const parsed = JSON.parse(text);
+      
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        content.innerHTML = parsed.map(p => \`
+          <div class="story-para">
+            <div class="story-para-hanzi">\${escapeHtml(p.hanzi)}</div>
+            <div class="story-para-pinyin">\${escapeHtml(p.pinyin)}</div>
+            <div class="story-para-indo">\${escapeHtml(p.indo)}</div>
+          </div>
+        \`).join('');
+      } else {
+        content.innerHTML = '<div style="text-align:center;padding:20px;color:var(--info);">Gagal menghasilkan cerita. Coba lagi.</div>';
+      }
+    } catch (e) {
+      content.innerHTML = \`<div style="text-align:center;padding:20px;color:var(--error);">Error: \${escapeHtml(e.message)}</div>\`;
+    }
+  }
+
+  el('#btn-generate-story').addEventListener('click', generateTocflStory);
+  el('#btn-regen-story').addEventListener('click', generateTocflStory);
+  
+  function closeStoryModal() {
+    const modal = el('#story-modal');
+    const scrim = el('#story-scrim');
+    modal.classList.remove('open');
+    scrim.classList.remove('show');
+    setTimeout(() => { modal.hidden = true; scrim.hidden = true; }, 200);
+  }
+  el('#btn-close-story').addEventListener('click', closeStoryModal);
+  el('#story-scrim').addEventListener('click', closeStoryModal);
+
 </script>
 
 </body>

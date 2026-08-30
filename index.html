@@ -15,6 +15,208 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@500;700;900&display=swap">
 <style>
+  /* ─── TOCFL Specific Styles ─── */
+  .tocfl-header {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .tocfl-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .tocfl-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 600px) {
+    .tocfl-stats-bar { grid-template-columns: repeat(3, 1fr); }
+  }
+  .tocfl-level-stat {
+    background: var(--bg-2);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .tocfl-level-stat .lvl-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .tocfl-level-stat .lvl-prog {
+    height: 4px;
+    background: var(--bg-3);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 4px 0;
+  }
+  .tocfl-level-stat .lvl-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .tocfl-level-stat .lvl-nums {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+  .tocfl-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 0 8px;
+    flex-wrap: wrap;
+  }
+  .tocfl-pagination button {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-1);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .tocfl-pagination button:hover:not(:disabled) {
+    background: var(--bg-3);
+    border-color: var(--border-strong);
+  }
+  .tocfl-pagination button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+  }
+  .tocfl-pagination button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .tocfl-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    position: relative;
+    transition: border-color 0.15s, transform 0.1s;
+  }
+  .tocfl-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .tocfl-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .tocfl-card-hanzi {
+    font-size: 22px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-1);
+  }
+  .tocfl-card-level {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tocfl-card-pinyin {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+  .tocfl-card-indo {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.4;
+    min-height: 18px;
+  }
+  .tocfl-card-indo.empty {
+    color: var(--text-3);
+    font-style: italic;
+  }
+  .tocfl-card-pos {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-top: 6px;
+  }
+  .tocfl-card-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .tocfl-card-actions button {
+    flex: 1;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    border-radius: var(--radius-sm);
+    padding: 5px 4px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tocfl-card-actions button:hover {
+    background: var(--bg-3);
+    color: var(--text-1);
+  }
+  .tocfl-card-actions button.ai-btn:hover {
+    background: rgba(255,138,61,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .tocfl-inline-edit {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .tocfl-inline-edit input {
+    flex: 1;
+    background: var(--bg-0);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    padding: 4px 8px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+  }
+  .tocfl-inline-edit button {
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--accent-ink);
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+  }
+  .tocfl-inline-edit .cancel-btn {
+    background: var(--bg-3);
+    color: var(--text-2);
+  }
+
   :root {
     --bg-0: #0B0A08;
     --bg-1: #161412;
@@ -895,39 +1097,56 @@
   </main>
 
   <main class="container" id="view-tocfl" hidden>
-    <div class="search" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; background: var(--bg-1); border: 1px solid var(--border); padding: 12px 16px; border-radius: var(--radius-lg);">
-      <h2 style="font-size: 18px; margin: 0; color: var(--accent);">TOCFL Dictionary</h2>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-ghost" id="btn-tocfl-back" style="padding: 10px 14px; font-size: 13px;">Kembali</button>
-        <button class="btn-primary" id="btn-sync-tocfl" style="padding: 10px 14px; font-size: 13px;">
-          <span class="spinner" hidden></span>
-          <span class="btn-label">🔄 Sync TOCFL</span>
-        </button>
+    <!-- TOCFL Header -->
+    <div class="tocfl-header">
+      <div class="tocfl-header-top">
+        <div>
+          <h2 style="font-size:18px;margin:0;color:var(--accent);">📚 TOCFL Vocabulary Bank</h2>
+          <p style="font-size:11px;color:var(--text-3);margin:2px 0 0 0;">Kosakata resmi A1–C2 · Sumber: tocfl.edu.tw</p>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="btn-ghost" id="btn-tocfl-back" style="padding:9px 12px;font-size:12px;">← Kembali</button>
+          <button class="btn-mini" id="btn-tocfl-import" title="Upload JSON vocab bank ke server">⬆ Import JSON</button>
+          <input type="file" id="file-tocfl-import" accept=".json" hidden />
+          <button class="btn-mini" id="btn-tocfl-export" title="Download vocab bank sebagai JSON">⬇ Export JSON</button>
+          <button class="btn-primary" id="btn-sync-tocfl" style="padding:9px 14px;font-size:12px;">
+            <span class="spinner" hidden></span>
+            <span class="btn-label">🔄 Sync dari GitHub</span>
+          </button>
+        </div>
       </div>
+
+      <!-- Progress stats per level -->
+      <div id="tocfl-stats-bar" class="tocfl-stats-bar"></div>
     </div>
-    
+
+    <!-- Filter section -->
     <section class="filter-section" aria-label="Filter TOCFL">
       <input
         id="q-tocfl-filter"
         type="search"
         class="filter-input"
-        placeholder="Cari Hanzi atau Pinyin..."
+        placeholder="Cari Hanzi, Pinyin, atau terjemahan Indonesia..."
         autocomplete="off"
       />
       <div class="cat-pills" id="tocfl-level-pills" role="tablist"></div>
     </section>
 
     <div class="list-meta">
-      <span id="tocfl-list-count">0 dari 0 kata</span>
-      <span id="tocfl-last-sync" style="font-size: 11px; opacity: 0.7;">Belum pernah sync</span>
+      <span id="tocfl-list-count">0 kata</span>
+      <span id="tocfl-last-sync" style="font-size:11px;opacity:0.7;">Belum pernah sync</span>
+      <button class="btn-mini" id="btn-ai-translate-batch" style="margin-left:auto;font-size:11px;" title="AI terjemahkan kata yang belum ada terjemahannya di halaman ini">✨ AI Terjemahkan Halaman</button>
     </div>
 
-    <div id="tocfl-list" class="grid" aria-live="polite"></div>
-    
+    <div id="tocfl-list" aria-live="polite" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;"></div>
+
+    <!-- Pagination -->
+    <div id="tocfl-pagination" class="tocfl-pagination" hidden></div>
+
     <div id="tocfl-empty-state" class="empty" hidden>
       <div class="empty-icon">📭</div>
       <h3 id="tocfl-empty-title">Tidak ada data TOCFL</h3>
-      <p id="tocfl-empty-desc">Klik "Sync TOCFL" untuk mengunduh daftar kata resmi dari server.</p>
+      <p id="tocfl-empty-desc">Klik "Sync dari GitHub" untuk mengunduh 7,500+ kata resmi TOCFL A1–C2.</p>
     </div>
   </main>
 
@@ -1105,11 +1324,17 @@
   };
 
   const tocflState = {
-    entries: [],
+    entries: [],       // current page entries
     query: '',
-    level: 'B1',
+    level: 'A1',       // current level filter
     loading: false,
-    lastSync: 0
+    lastSync: 0,
+    stats: {},         // { A1: { total, translated }, ... }
+    allTotal: 0,       // total matching filter
+    offset: 0,         // pagination offset
+    limit: 100,        // items per page
+    aiTranslating: false,
+
   };
 
   // ─── Storage ─────────────────────────────────────────────────
@@ -2154,40 +2379,214 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
   }
 
   // ─── TOCFL Logic ─────────────────────────────────────────────
-  async function fetchTocfl() {
+  const LEVEL_COLORS = {
+    'A1': '#6FCF97', 'A2': '#27AE60',
+    'B1': '#5AA9E6', 'B2': '#2F80ED',
+    'C1': '#E9A23B', 'C2': '#D64545',
+  };
+
+  async function fetchTocflPage() {
     if (!isShared() || state.mode !== 'admin') return;
+    tocflState.loading = true;
     try {
-      const data = await apiCall('/tocfl', { method: 'GET' });
+      const params = new URLSearchParams({
+        level: tocflState.level,
+        q: tocflState.query,
+        offset: tocflState.offset,
+        limit: tocflState.limit,
+      });
+      const data = await apiCall('/tocfl?' + params.toString(), { method: 'GET' });
       tocflState.entries = data.entries || [];
+      tocflState.allTotal = data.total || 0;
+      tocflState.stats = data.stats || {};
+      if (data.lastSync) tocflState.lastSync = parseInt(data.lastSync);
       renderTocfl();
     } catch (e) {
-      toast('Gagal memuat TOCFL', 'error');
+      toast('Gagal memuat TOCFL: ' + e.message, 'error');
+    } finally {
+      tocflState.loading = false;
     }
   }
 
   async function syncTocflData() {
     if (!isShared() || state.mode !== 'admin') return;
-    if (!confirm('Sync data TOCFL resmi akan memakan waktu beberapa detik. Lanjutkan?')) return;
-    
+    if (!confirm('Sync 7,500+ kata TOCFL resmi dari GitHub (ivankra/tocfl). Mungkin butuh 10-15 detik. Lanjutkan?')) return;
+
     const btn = el('#btn-sync-tocfl');
     const spin = el('.spinner', btn);
     const lbl = el('.btn-label', btn);
     btn.disabled = true;
     spin.hidden = false;
     lbl.textContent = 'Syncing...';
-    
+
     try {
       const data = await apiCall('/tocfl/sync', { method: 'POST' });
-      toast(`✅ Sync selesai. ${data.added} baru, ${data.updated} diupdate.`, 'success');
       tocflState.lastSync = data.lastSync || Date.now();
-      await fetchTocfl();
+      tocflState.stats = data.stats || {};
+      toast(`✅ Sync selesai! ${data.added} kata baru, ${data.updated} diupdate. Total: ${data.total}`, 'success');
+      tocflState.offset = 0;
+      await fetchTocflPage();
     } catch (e) {
       toast('Sync gagal: ' + e.message, 'error');
     } finally {
       btn.disabled = false;
       spin.hidden = true;
-      lbl.textContent = '🔄 Sync TOCFL';
+      lbl.textContent = '🔄 Sync dari GitHub';
     }
+  }
+
+  async function importTocflJSON(file) {
+    if (!isShared() || state.mode !== 'admin') return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const entries = Array.isArray(parsed) ? parsed
+        : Array.isArray(parsed.entries) ? parsed.entries
+        : null;
+      if (!entries) throw new Error('Format JSON tidak valid (perlu array atau {entries:[]})');
+
+      if (!confirm(`Upload ${entries.length} kata TOCFL ke server? Kata yang sudah ada akan di-merge (terjemahan Indonesia dipertahankan).`)) return;
+
+      const btn = el('#btn-tocfl-import');
+      btn.disabled = true;
+      btn.textContent = 'Uploading...';
+
+      const data = await apiCall('/tocfl/upload', {
+        method: 'POST',
+        body: JSON.stringify({ entries }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      tocflState.stats = data.stats || {};
+      toast(`✅ Upload selesai! ${data.added} baru, ${data.updated} diupdate. Total: ${data.total}`, 'success');
+      tocflState.offset = 0;
+      await fetchTocflPage();
+    } catch (e) {
+      toast('Import gagal: ' + e.message, 'error');
+    } finally {
+      const btn = el('#btn-tocfl-import');
+      btn.disabled = false;
+      btn.textContent = '⬆ Import JSON';
+      el('#file-tocfl-import').value = '';
+    }
+  }
+
+  function exportTocflJSON() {
+    // Export current in-memory entries (all levels)
+    const data = {
+      version: '202307',
+      source: 'Kamus Konstruksi TOCFL Export',
+      exportedAt: new Date().toISOString(),
+      stats: tocflState.stats,
+      entries: tocflState.entries,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tocfl-vocab-${tocflState.level}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(`⬇ ${tocflState.entries.length} kata TOCFL ${tocflState.level} diekspor`, 'success');
+  }
+
+  async function saveTocflIndonesia(id, indonesia) {
+    if (!isShared() || state.mode !== 'admin') return;
+    try {
+      await apiCall(`/tocfl/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ indonesia }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      // Update local entry
+      const idx = tocflState.entries.findIndex(e => e.id === id);
+      if (idx >= 0) {
+        tocflState.entries[idx].indonesia = indonesia;
+        // Update stats
+        const level = tocflState.entries[idx].level;
+        if (tocflState.stats[level]) {
+          const wasEmpty = !tocflState.entries[idx].indonesia || tocflState.entries[idx].indonesia === indonesia;
+          if (indonesia && wasEmpty) tocflState.stats[level].translated++;
+        }
+      }
+      renderTocflStats();
+      return true;
+    } catch (e) {
+      toast('Gagal simpan: ' + e.message, 'error');
+      return false;
+    }
+  }
+
+  async function aiTranslateTocflEntry(entry) {
+    if (!isShared()) throw new Error('Perlu koneksi worker');
+    const prompt = `Terjemahkan kata Mandarin berikut ke Bahasa Indonesia. Berikan HANYA terjemahan Indonesia singkat (1-5 kata), tanpa penjelasan tambahan.
+
+Hanzi: ${entry.hanzi}
+Pinyin: ${entry.pinyin}
+Kelas kata: ${entry.pos || 'tidak diketahui'}
+
+Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
+
+    const data = await apiCall('/ai', {
+      method: 'POST',
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 50, responseMimeType: 'application/json' },
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const parsed = JSON.parse(text);
+    return String(parsed.indonesia || '').trim();
+  }
+
+  async function batchAITranslate() {
+    if (!isShared() || state.mode !== 'admin') return;
+    if (tocflState.aiTranslating) return;
+
+    const untranslated = tocflState.entries.filter(e => !e.indonesia);
+    if (!untranslated.length) { toast('Semua kata di halaman ini sudah diterjemahkan!', 'success'); return; }
+    if (!confirm(`AI akan menterjemahkan ${untranslated.length} kata yang belum ada terjemahannya di halaman ini. Lanjutkan?`)) return;
+
+    tocflState.aiTranslating = true;
+    const btn = el('#btn-ai-translate-batch');
+    if (btn) { btn.disabled = true; btn.textContent = 'Translating...'; }
+
+    let done = 0;
+    for (const entry of untranslated) {
+      try {
+        const indonesia = await aiTranslateTocflEntry(entry);
+        if (indonesia) {
+          await saveTocflIndonesia(entry.id, indonesia);
+          done++;
+          if (btn) btn.textContent = `✨ ${done}/${untranslated.length}...`;
+        }
+        await new Promise(r => setTimeout(r, 300)); // Rate limit
+      } catch (e) {
+        // Skip on error, continue
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    tocflState.aiTranslating = false;
+    if (btn) { btn.disabled = false; btn.textContent = '✨ AI Terjemahkan Halaman'; }
+    toast(`✅ AI selesai menerjemahkan ${done} kata`, 'success');
+    renderTocfl();
+  }
+
+  function renderTocflStats() {
+    const container = el('#tocfl-stats-bar');
+    if (!container) return;
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+    container.innerHTML = levels.map(l => {
+      const s = tocflState.stats[l] || { total: 0, translated: 0 };
+      const pct = s.total > 0 ? Math.round(s.translated / s.total * 100) : 0;
+      const color = LEVEL_COLORS[l] || 'var(--accent)';
+      return `<div class="tocfl-level-stat" style="cursor:pointer;" onclick="document.getElementById('tocfl-level-pills').querySelector('[data-tocfl-level=${l}]')?.click()">
+        <div class="lvl-name" style="color:${color};">${l}</div>
+        <div class="lvl-prog"><div class="lvl-fill" style="width:${pct}%;background:${color};"></div></div>
+        <div class="lvl-nums">${s.translated}/${s.total}<br><span style="opacity:.7;">${pct}%</span></div>
+      </div>`;
+    }).join('');
   }
 
   function renderTocflPills() {
@@ -2195,102 +2594,157 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
     container.innerHTML = levels.map(l => {
       const active = l === tocflState.level;
+      const color = LEVEL_COLORS[l] || 'var(--accent)';
+      const s = tocflState.stats[l] || {};
+      const count = s.total ? ` (${s.total})` : '';
       return `<button
         class="cat-pill ${active ? 'active' : ''}"
         data-tocfl-level="${l}"
         role="tab"
-        style="--pill-color: var(--accent);"
+        style="--pill-color: ${color};"
         aria-selected="${active}"
-      >${l}</button>`;
+      >${l}${count}</button>`;
     }).join('');
   }
 
-  function getTocflFiltered() {
-    const q = tocflState.query.toLowerCase();
-    const lvl = tocflState.level;
-    return tocflState.entries.filter(e => {
-      if (e.level !== lvl) return false;
-      if (!q) return true;
-      return (
-        e.hanzi.toLowerCase().includes(q) ||
-        e.pinyin.toLowerCase().includes(q) ||
-        (e.indonesia || '').toLowerCase().includes(q)
-      );
+  function renderTocflPagination() {
+    const container = el('#tocfl-pagination');
+    if (!container) return;
+    const total = tocflState.allTotal;
+    const limit = tocflState.limit;
+    const pages = Math.ceil(total / limit);
+    if (pages <= 1) { container.hidden = true; return; }
+
+    container.hidden = false;
+    const curPage = Math.floor(tocflState.offset / limit);
+    const maxBtns = 7;
+    let start = Math.max(0, curPage - Math.floor(maxBtns / 2));
+    let end = Math.min(pages - 1, start + maxBtns - 1);
+    if (end - start < maxBtns - 1) start = Math.max(0, end - maxBtns + 1);
+
+    let html = `<button ${curPage === 0 ? 'disabled' : ''} data-page="${curPage - 1}">&laquo; Prev</button>`;
+    for (let p = start; p <= end; p++) {
+      html += `<button class="${p === curPage ? 'active' : ''}" data-page="${p}">${p + 1}</button>`;
+    }
+    html += `<button ${curPage === pages - 1 ? 'disabled' : ''} data-page="${curPage + 1}">Next &raquo;</button>`;
+    container.innerHTML = html;
+
+    container.addEventListener('click', ev => {
+      const btn = ev.target.closest('[data-page]');
+      if (!btn || btn.disabled) return;
+      const page = parseInt(btn.dataset.page);
+      tocflState.offset = page * limit;
+      fetchTocflPage();
+    }, { once: true });
+  }
+
+  function makeTocflCard(entry) {
+    const color = LEVEL_COLORS[entry.level] || 'var(--accent)';
+    const hasIndo = !!entry.indonesia;
+    const div = document.createElement('div');
+    div.className = 'tocfl-card';
+    div.dataset.id = entry.id;
+    div.innerHTML = `
+      <div class="tocfl-card-head">
+        <div class="tocfl-card-hanzi">${escapeHtml(entry.hanzi)}</div>
+        <span class="tocfl-card-level" style="background:${color}22;color:${color};border:1px solid ${color}44;">${entry.level}</span>
+      </div>
+      <div class="tocfl-card-pinyin">${escapeHtml(entry.pinyin || '—')}</div>
+      <div class="tocfl-card-indo ${hasIndo ? '' : 'empty'}" data-id="${entry.id}">${hasIndo ? escapeHtml(entry.indonesia) : '(belum diterjemahkan)'}</div>
+      ${entry.pos ? `<span class="tocfl-card-pos">${entry.pos}</span>` : ''}
+      <div class="tocfl-inline-edit" hidden>
+        <input type="text" placeholder="Terjemahan Indonesia..." value="${escapeHtml(entry.indonesia || '')}" />
+        <button class="cancel-btn" title="Batal">✕</button>
+        <button class="save-indo-btn" title="Simpan">✓</button>
+      </div>
+      <div class="tocfl-card-actions">
+        <button class="edit-indo-btn" title="Edit terjemahan">✏ Terjemahkan</button>
+        <button class="ai-btn" title="AI auto-terjemah">✨ AI</button>
+      </div>
+    `;
+
+    // Edit toggle
+    const inlineEdit = div.querySelector('.tocfl-inline-edit');
+    const indoDiv = div.querySelector('.tocfl-card-indo');
+    const input = div.querySelector('.tocfl-inline-edit input');
+
+    div.querySelector('.edit-indo-btn').addEventListener('click', () => {
+      inlineEdit.hidden = !inlineEdit.hidden;
+      if (!inlineEdit.hidden) { input.value = entry.indonesia || ''; input.focus(); }
     });
+    div.querySelector('.cancel-btn').addEventListener('click', () => { inlineEdit.hidden = true; });
+    div.querySelector('.save-indo-btn').addEventListener('click', async () => {
+      const val = input.value.trim();
+      const ok = await saveTocflIndonesia(entry.id, val);
+      if (ok) {
+        entry.indonesia = val;
+        indoDiv.textContent = val || '(belum diterjemahkan)';
+        indoDiv.className = 'tocfl-card-indo' + (val ? '' : ' empty');
+        inlineEdit.hidden = true;
+      }
+    });
+
+    // AI translate single entry
+    div.querySelector('.ai-btn').addEventListener('click', async btn => {
+      const b = btn.currentTarget;
+      b.disabled = true; b.textContent = '...';
+      try {
+        const indo = await aiTranslateTocflEntry(entry);
+        if (indo) {
+          input.value = indo;
+          inlineEdit.hidden = false;
+          input.focus();
+        } else toast('AI tidak mengembalikan hasil', 'error');
+      } catch (e) { toast('AI error: ' + e.message, 'error'); }
+      finally { b.disabled = false; b.textContent = '✨ AI'; }
+    });
+
+    return div;
   }
 
   function renderTocfl() {
     renderTocflPills();
-    const filtered = getTocflFiltered();
-    
-    el('#tocfl-list-count').textContent = `${filtered.length} dari ${tocflState.entries.length} kata TOCFL`;
-    el('#tocfl-last-sync').textContent = tocflState.lastSync 
-      ? 'Sync terakhir: ' + new Date(tocflState.lastSync).toLocaleString('id-ID')
-      : (tocflState.entries.length > 0 ? 'Data lokal termuat' : 'Belum pernah sync');
+    renderTocflStats();
 
     const list = el('#tocfl-list');
     const empty = el('#tocfl-empty-state');
-    
-    if (tocflState.entries.length === 0) {
+
+    el('#tocfl-list-count').textContent = `${tocflState.allTotal} kata level ${tocflState.level}`
+      + (tocflState.query ? ` · filter: "${tocflState.query}"` : '');
+    el('#tocfl-last-sync').textContent = tocflState.lastSync
+      ? 'Sync: ' + new Date(tocflState.lastSync).toLocaleString('id-ID', { day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : (Object.keys(tocflState.stats).length ? 'Data tersedia' : 'Belum pernah sync');
+
+    if (!Object.keys(tocflState.stats).length && tocflState.entries.length === 0) {
       list.innerHTML = '';
       empty.hidden = false;
       el('#tocfl-empty-title').textContent = 'Tidak ada data TOCFL';
-      el('#tocfl-empty-desc').textContent = 'Klik "Sync TOCFL" untuk mengunduh daftar kata resmi dari server.';
+      el('#tocfl-empty-desc').textContent = 'Klik "Sync dari GitHub" untuk mengunduh 7,500+ kata resmi TOCFL A1–C2.';
+      el('#tocfl-pagination').hidden = true;
       return;
     }
-    
-    if (filtered.length === 0) {
+
+    if (tocflState.entries.length === 0) {
       list.innerHTML = '';
       empty.hidden = false;
       el('#tocfl-empty-title').textContent = 'Tidak ditemukan';
-      el('#tocfl-empty-desc').textContent = 'Coba ganti kata kunci pencarian.';
+      el('#tocfl-empty-desc').textContent = `Tidak ada kata ${tocflState.level} yang cocok dengan pencarian.`;
+      el('#tocfl-pagination').hidden = true;
       return;
     }
-    
+
     empty.hidden = true;
-    
-    // Virtualization / limits for performance (prevent DOM crash)
-    const MAX_RENDER = 200;
-    const toRender = filtered.slice(0, MAX_RENDER);
-    
-    const tpl = el('#tpl-card');
     list.innerHTML = '';
-    toRender.forEach(entry => {
-      const node = tpl.content.cloneNode(true);
-      const card = node.querySelector('.card');
-      card.style.setProperty('--card-accent', 'var(--accent)');
-      card.style.setProperty('--card-tag-bg', 'rgba(255,138,61,0.15)');
-      
-      node.querySelector('.card-tag').textContent = entry.level;
-      node.querySelector('.card-hanzi').textContent = entry.hanzi;
-      node.querySelector('.card-pinyin').textContent = entry.pinyin || '—';
-      node.querySelector('.card-indo').textContent = entry.indonesia || '(tidak ada terjemahan)';
-      node.querySelector('.card-note').hidden = true;
-      
-      // Hide actions
-      const actions = node.querySelector('.card-actions');
-      if (actions) actions.remove();
-      
-      list.appendChild(node);
-    });
-    
-    if (filtered.length > MAX_RENDER) {
-      const more = document.createElement('div');
-      more.style.textAlign = 'center';
-      more.style.padding = '12px';
-      more.style.gridColumn = '1 / -1';
-      more.style.color = 'var(--text-3)';
-      more.textContent = `... dan ${filtered.length - MAX_RENDER} lainnya (Gunakan pencarian untuk lebih spesifik)`;
-      list.appendChild(more);
-    }
+    tocflState.entries.forEach(entry => list.appendChild(makeTocflCard(entry)));
+    renderTocflPagination();
   }
 
   function openTocfl() {
     if (state.mode !== 'admin') return;
     el('#view-main').hidden = true;
     el('#view-tocfl').hidden = false;
-    if (tocflState.entries.length === 0) fetchTocfl();
-    renderTocfl();
+    if (!Object.keys(tocflState.stats).length) fetchTocflPage();
+    else renderTocfl();
   }
   function closeTocfl() {
     el('#view-main').hidden = false;
@@ -2369,16 +2823,27 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     el('#btn-open-tocfl').addEventListener('click', openTocfl);
     el('#btn-tocfl-back').addEventListener('click', closeTocfl);
     el('#btn-sync-tocfl').addEventListener('click', syncTocflData);
-    
+    el('#btn-tocfl-export').addEventListener('click', exportTocflJSON);
+    el('#btn-tocfl-import').addEventListener('click', () => el('#file-tocfl-import').click());
+    el('#file-tocfl-import').addEventListener('change', ev => {
+      const file = ev.target.files?.[0];
+      if (file) importTocflJSON(file);
+    });
+    el('#btn-ai-translate-batch').addEventListener('click', batchAITranslate);
+
     el('#q-tocfl-filter').addEventListener('input', ev => {
       tocflState.query = ev.target.value;
-      renderTocfl();
+      tocflState.offset = 0;
+      // Debounce
+      clearTimeout(tocflState._debounceTimer);
+      tocflState._debounceTimer = setTimeout(() => fetchTocflPage(), 300);
     });
     el('#tocfl-level-pills').addEventListener('click', ev => {
       const b = ev.target.closest('.cat-pill');
       if (!b) return;
       tocflState.level = b.dataset.tocflLevel;
-      renderTocfl();
+      tocflState.offset = 0;
+      fetchTocflPage();
     });
 
     document.addEventListener('keydown', ev => {

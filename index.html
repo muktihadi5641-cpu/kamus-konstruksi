@@ -2490,18 +2490,21 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     toast(`⬇ ${tocflState.entries.length} kata TOCFL ${tocflState.level} diekspor`, 'success');
   }
 
-  async function saveTocflIndonesia(id, indonesia) {
+  async function saveTocflIndonesia(id, indonesia, contoh) {
     if (!isShared() || state.mode !== 'admin') return;
     try {
+      const body = { indonesia };
+      if (contoh !== undefined) body.contoh = contoh;
       await apiCall(`/tocfl/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ indonesia }),
+        body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' },
       });
       // Update local entry
       const idx = tocflState.entries.findIndex(e => e.id === id);
       if (idx >= 0) {
         tocflState.entries[idx].indonesia = indonesia;
+        if (contoh !== undefined) tocflState.entries[idx].contoh = contoh;
         // Update stats
         const level = tocflState.entries[idx].level;
         if (tocflState.stats[level]) {
@@ -2519,25 +2522,28 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
 
   async function aiTranslateTocflEntry(entry) {
     if (!isShared()) throw new Error('Perlu koneksi worker');
-    const prompt = `Terjemahkan kata Mandarin berikut ke Bahasa Indonesia. Berikan HANYA terjemahan Indonesia singkat (1-5 kata), tanpa penjelasan tambahan.
+    const prompt = `Terjemahkan kata Mandarin berikut ke Bahasa Indonesia. Berikan terjemahan singkat, lalu berikan 1 contoh kalimat sederhana menggunakan kata tersebut (beserta pinyin dan terjemahan kalimatnya).
 
 Hanzi: ${entry.hanzi}
 Pinyin: ${entry.pinyin}
 Kelas kata: ${entry.pos || 'tidak diketahui'}
 
-Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
+Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pinyin) - Arti kalimat contoh"}`;
 
     const data = await apiCall('/ai', {
       method: 'POST',
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 50, responseMimeType: 'application/json' },
+        generationConfig: { temperature: 0.2, maxOutputTokens: 150, responseMimeType: 'application/json' },
       }),
       headers: { 'Content-Type': 'application/json' },
     });
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     const parsed = JSON.parse(text);
-    return String(parsed.indonesia || '').trim();
+    return {
+      indonesia: String(parsed.indonesia || '').trim(),
+      contoh: String(parsed.contoh || '').trim()
+    };
   }
 
   async function batchAITranslate() {
@@ -2555,9 +2561,9 @@ Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
     let done = 0;
     for (const entry of untranslated) {
       try {
-        const indonesia = await aiTranslateTocflEntry(entry);
-        if (indonesia) {
-          await saveTocflIndonesia(entry.id, indonesia);
+        const result = await aiTranslateTocflEntry(entry);
+        if (result && result.indonesia) {
+          await saveTocflIndonesia(entry.id, result.indonesia, result.contoh);
           done++;
           if (btn) btn.textContent = `✨ ${done}/${untranslated.length}...`;
         }
@@ -2653,10 +2659,15 @@ Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
       <div class="tocfl-card-pinyin">${escapeHtml(entry.pinyin || '—')}</div>
       <div class="tocfl-card-indo ${hasIndo ? '' : 'empty'}" data-id="${entry.id}">${hasIndo ? escapeHtml(entry.indonesia) : '(belum diterjemahkan)'}</div>
       ${entry.pos ? `<span class="tocfl-card-pos">${entry.pos}</span>` : ''}
-      <div class="tocfl-inline-edit" hidden>
-        <input type="text" placeholder="Terjemahan Indonesia..." value="${escapeHtml(entry.indonesia || '')}" />
-        <button class="cancel-btn" title="Batal">✕</button>
-        <button class="save-indo-btn" title="Simpan">✓</button>
+      <div class="tocfl-card-contoh" style="margin-top:8px;font-size:12px;color:var(--text-3);line-height:1.4;">${entry.contoh ? escapeHtml(entry.contoh) : ''}</div>
+      
+      <div class="tocfl-inline-edit" hidden style="flex-direction:column;">
+        <input type="text" class="edit-indo" placeholder="Terjemahan Indonesia..." value="${escapeHtml(entry.indonesia || '')}" style="margin-bottom:4px;" />
+        <textarea class="edit-contoh" placeholder="Contoh kalimat (opsional)..." rows="2" style="background:var(--bg-0);border:1px solid var(--accent);border-radius:var(--radius-sm);color:var(--text-1);padding:4px 8px;font-size:12px;font-family:inherit;outline:none;resize:vertical;">${escapeHtml(entry.contoh || '')}</textarea>
+        <div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px;">
+          <button class="cancel-btn" title="Batal">✕</button>
+          <button class="save-indo-btn" title="Simpan">✓</button>
+        </div>
       </div>
       <div class="tocfl-card-actions">
         <button class="edit-indo-btn" title="Edit terjemahan">✏ Terjemahkan</button>
@@ -2667,20 +2678,29 @@ Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
     // Edit toggle
     const inlineEdit = div.querySelector('.tocfl-inline-edit');
     const indoDiv = div.querySelector('.tocfl-card-indo');
-    const input = div.querySelector('.tocfl-inline-edit input');
+    const contohDiv = div.querySelector('.tocfl-card-contoh');
+    const inputIndo = div.querySelector('.edit-indo');
+    const inputContoh = div.querySelector('.edit-contoh');
 
     div.querySelector('.edit-indo-btn').addEventListener('click', () => {
       inlineEdit.hidden = !inlineEdit.hidden;
-      if (!inlineEdit.hidden) { input.value = entry.indonesia || ''; input.focus(); }
+      if (!inlineEdit.hidden) { 
+        inputIndo.value = entry.indonesia || ''; 
+        inputContoh.value = entry.contoh || '';
+        inputIndo.focus(); 
+      }
     });
     div.querySelector('.cancel-btn').addEventListener('click', () => { inlineEdit.hidden = true; });
     div.querySelector('.save-indo-btn').addEventListener('click', async () => {
-      const val = input.value.trim();
-      const ok = await saveTocflIndonesia(entry.id, val);
+      const valIndo = inputIndo.value.trim();
+      const valContoh = inputContoh.value.trim();
+      const ok = await saveTocflIndonesia(entry.id, valIndo, valContoh);
       if (ok) {
-        entry.indonesia = val;
-        indoDiv.textContent = val || '(belum diterjemahkan)';
-        indoDiv.className = 'tocfl-card-indo' + (val ? '' : ' empty');
+        entry.indonesia = valIndo;
+        entry.contoh = valContoh;
+        indoDiv.textContent = valIndo || '(belum diterjemahkan)';
+        indoDiv.className = 'tocfl-card-indo' + (valIndo ? '' : ' empty');
+        contohDiv.textContent = valContoh || '';
         inlineEdit.hidden = true;
       }
     });
@@ -2690,11 +2710,12 @@ Jawab dengan format JSON: {"indonesia": "terjemahan"}`;
       const b = btn.currentTarget;
       b.disabled = true; b.textContent = '...';
       try {
-        const indo = await aiTranslateTocflEntry(entry);
-        if (indo) {
-          input.value = indo;
+        const result = await aiTranslateTocflEntry(entry);
+        if (result && result.indonesia) {
+          inputIndo.value = result.indonesia;
+          inputContoh.value = result.contoh || '';
           inlineEdit.hidden = false;
-          input.focus();
+          inputIndo.focus();
         } else toast('AI tidak mengembalikan hasil', 'error');
       } catch (e) { toast('AI error: ' + e.message, 'error'); }
       finally { b.disabled = false; b.textContent = '✨ AI'; }

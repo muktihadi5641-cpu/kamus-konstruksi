@@ -447,6 +447,7 @@ async function handleTocflUpload(request, env, cors, mode) {
             ...ex,
             pinyin: raw.pinyin || ex.pinyin,
             indonesia: raw.indonesia || ex.indonesia,
+            contoh: raw.contoh || ex.contoh,
             pos: raw.pos || ex.pos,
             updatedAt: Date.now(),
           };
@@ -459,6 +460,7 @@ async function handleTocflUpload(request, env, cors, mode) {
         hanzi: String(raw.hanzi).trim().slice(0, 50),
         pinyin: String(raw.pinyin || '').trim().slice(0, 100),
         indonesia: String(raw.indonesia || '').trim().slice(0, 200),
+        contoh: String(raw.contoh || '').trim().slice(0, 500),
         level: raw.level,
         pos: String(raw.pos || '').trim().slice(0, 20),
         source: raw.source || 'upload',
@@ -497,6 +499,7 @@ async function handleTocflEdit(request, env, cors, mode, id) {
   entries[idx] = {
     ...entries[idx],
     indonesia: patch.indonesia !== undefined ? String(patch.indonesia).trim().slice(0, 200) : entries[idx].indonesia,
+    contoh: patch.contoh !== undefined ? String(patch.contoh).trim().slice(0, 500) : entries[idx].contoh,
     pinyin: patch.pinyin !== undefined ? String(patch.pinyin).trim().slice(0, 100) : entries[idx].pinyin,
     updatedAt: Date.now(),
   };

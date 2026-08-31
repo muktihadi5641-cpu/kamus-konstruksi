@@ -1144,6 +1144,25 @@
       <div class="cat-pills" id="tocfl-level-pills" role="tablist"></div>
     </section>
 
+    <!-- Podcast Add Form -->
+    <form class="search" id="tocfl-add-form" style="display:none; margin-bottom: 20px;">
+      <input
+        id="q-tocfl-add"
+        type="text"
+        placeholder="Ketik hanzi, pinyin, atau kata untuk Vocab Podcast..."
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="search"
+      />
+      <button type="submit" id="btn-tocfl-add" class="btn-primary">
+        <span class="spinner" hidden></span>
+        <span class="btn-label">Cari &amp; Tambah</span>
+      </button>
+    </form>
+    
+    <div id="tocfl-draft-slot"></div>
+
     <div class="list-meta">
       <span id="tocfl-list-count">0 kata</span>
       <span id="tocfl-last-sync" style="font-size:11px;opacity:0.7;">Belum pernah sync</span>
@@ -1889,6 +1908,104 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
   }
 
   // ─── Actions ─────────────────────────────────────────────────
+  // ─── TOCFL Vocab Podcast Add Logic ─────────────────────────
+  let tocflPending = null;
+  async function onTocflSearch(ev) {
+    ev.preventDefault();
+    const input = el('#q-tocfl-add');
+    const term = input.value.trim();
+    if (!term || tocflState.loading) return;
+
+    clearAlert();
+    tocflPending = null;
+    renderTocflDraft();
+
+    const btn = el('#btn-tocfl-add');
+    btn.disabled = true;
+    btn.querySelector('.spinner').hidden = false;
+    btn.querySelector('.btn-label').textContent = 'Mencari...';
+
+    try {
+      const result = await lookupTerm(term);
+      tocflPending = result;
+      renderTocflDraft();
+      input.value = '';
+    } catch (err) {
+      console.error(err);
+      tocflPending = { hanzi: term, pinyin: '', indonesia: '', contoh: '' };
+      renderTocflDraft();
+      const cat = classifyAIError(err);
+      toast(cat.message, cat.kind);
+    } finally {
+      btn.disabled = false;
+      btn.querySelector('.spinner').hidden = true;
+      btn.querySelector('.btn-label').textContent = 'Cari & Tambah';
+    }
+  }
+
+  function renderTocflDraft() {
+    const slot = el('#tocfl-draft-slot');
+    if (!tocflPending) {
+      slot.innerHTML = '';
+      return;
+    }
+    const d = tocflPending;
+    slot.innerHTML = `
+      <form class="card draft" id="tocfl-draft-form">
+        <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--accent);">
+          ✨ Draf Vocab Podcast
+        </div>
+        <input type="text" id="td-hanzi" value="${escapeHtml(d.hanzi)}" placeholder="Hanzi..." required />
+        <input type="text" id="td-pinyin" value="${escapeHtml(d.pinyin)}" placeholder="Pinyin..." required />
+        <input type="text" id="td-indonesia" value="${escapeHtml(d.indonesia)}" placeholder="Terjemahan..." required />
+        <textarea id="td-contoh" placeholder="Contoh kalimat..." rows="2">${escapeHtml(d.contoh || '')}</textarea>
+        
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button type="submit" class="btn-primary" style="flex:1;">Simpan ke TOCFL</button>
+          <button type="button" class="btn-ghost" onclick="cancelTocflDraft()">Batal</button>
+        </div>
+      </form>
+    `;
+    el('#tocfl-draft-form').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const payload = {
+        id: 'pod-' + Date.now() + '-' + Math.random().toString(36).substr(2,4),
+        hanzi: el('#td-hanzi').value.trim(),
+        pinyin: el('#td-pinyin').value.trim(),
+        indonesia: el('#td-indonesia').value.trim(),
+        contoh: el('#td-contoh').value.trim(),
+        pos: 'Podcast',
+        level: 'Vocab Podcast'
+      };
+      
+      const btn = ev.target.querySelector('button[type="submit"]');
+      const origText = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+      try {
+        const res = await fetch(API_BASE + '/tocfl/upload', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ entries: [payload] })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        toast('Berhasil ditambahkan ke Vocab Podcast!', 'success');
+        tocflPending = null;
+        renderTocflDraft();
+        syncTocflData();
+      } catch (err) {
+        console.error(err);
+        toast('Gagal menyimpan: ' + err.message, 'error');
+        btn.disabled = false; btn.textContent = origText;
+      }
+    });
+  }
+
+  window.cancelTocflDraft = () => {
+    tocflPending = null;
+    renderTocflDraft();
+  };
+
   async function onSearch(ev) {
     ev.preventDefault();
     const input = el('#q-add');
@@ -2415,6 +2532,7 @@ Jika input tidak jelas atau bukan istilah konstruksi, tetap berikan tebakan terb
     'A1': '#6FCF97', 'A2': '#27AE60',
     'B1': '#5AA9E6', 'B2': '#2F80ED',
     'C1': '#E9A23B', 'C2': '#D64545',
+    'Vocab Podcast': '#9b59b6'
   };
 
   async function fetchTocflPage() {
@@ -2615,7 +2733,22 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
   function renderTocflStats() {
     const container = el('#tocfl-stats-bar');
     if (!container) return;
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B1課', 'B2課'];
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B1課', 'B2課', 'Vocab Podcast'];
+    
+    let totalTranslated = 0;
+    let totalItems = 0;
+    levels.forEach(l => {
+      const s = tocflState.stats[l] || { total: 0, translated: 0 };
+      totalTranslated += s.translated;
+      totalItems += s.total;
+    });
+
+    if (totalItems > 0 && totalTranslated >= totalItems) {
+      container.style.display = 'none';
+      return;
+    }
+    container.style.display = '';
+
     container.innerHTML = levels.map(l => {
       const s = tocflState.stats[l] || { total: 0, translated: 0 };
       const pct = s.total > 0 ? Math.round(s.translated / s.total * 100) : 0;
@@ -2630,7 +2763,7 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
 
   function renderTocflPills() {
     const container = el('#tocfl-level-pills');
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B1課', 'B2課'];
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B1課', 'B2課', 'Vocab Podcast'];
     container.innerHTML = levels.map(l => {
       const active = l === tocflState.level;
       const color = LEVEL_COLORS[l] || 'var(--accent)';
@@ -2765,6 +2898,11 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
 
     el('#tocfl-list-count').textContent = `${tocflState.allTotal} kata level ${tocflState.level}`
       + (tocflState.query ? ` · filter: "${tocflState.query}"` : '');
+    
+    const addForm = el('#tocfl-add-form');
+    if (addForm) {
+      addForm.style.display = (tocflState.level === 'Vocab Podcast') ? 'flex' : 'none';
+    }
     el('#tocfl-last-sync').textContent = tocflState.lastSync
       ? 'Sync: ' + new Date(tocflState.lastSync).toLocaleString('id-ID', { day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
       : (Object.keys(tocflState.stats).length ? 'Data tersedia' : 'Belum pernah sync');
@@ -2875,6 +3013,8 @@ Jawab HANYA dengan format JSON: {"indonesia": "terjemahan", "contoh": "Hanzi (Pi
 
     // TOCFL listeners
     el('#btn-open-tocfl').addEventListener('click', openTocfl);
+    const addForm = el('#tocfl-add-form');
+    if (addForm) addForm.addEventListener('submit', onTocflSearch);
     el('#btn-tocfl-back').addEventListener('click', closeTocfl);
     el('#btn-sync-tocfl').addEventListener('click', syncTocflData);
     el('#btn-tocfl-export').addEventListener('click', exportTocflJSON);
